@@ -4,219 +4,232 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Air Buffalo BioPad</title>
+
   <style>
     :root {
-      --blue: #0a33cc;
-      --blue2: #061e88;
-      --yellow: #f1d200;
-      --green: #19a019;
-      --red: #b10a0a;
-      --cyan: #00cfff;
-      --gray: #cfcfcf;
+      --navy: #071b3a;
+      --navy2: #0b2a57;
+      --navy3: #102f5f;
+      --red: #8f1728;
+      --red2: #b21f35;
+      --cream: #f6f3ea;
+      --white: #ffffff;
+      --muted: rgba(255,255,255,.68);
+      --soft: rgba(255,255,255,.12);
+      --cyan: #67d8ff;
+      --green: #20a65a;
+      --amber: #f3c95c;
+      --danger: #d94848;
+      --shadow: rgba(0,0,0,.45);
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
 
-    html, body {
-      margin: 0;
-      height: 100%;
-      background: var(--gray);
-      font-family: var(--sans);
-      overflow: hidden;
-    }
-
-    .shell {
-      height: 100dvh;
+    * {
       box-sizing: border-box;
-      padding: 10px;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(143,23,40,.32), transparent 30%),
+        radial-gradient(circle at 85% 12%, rgba(103,216,255,.20), transparent 28%),
+        linear-gradient(135deg, #05101f 0%, #071b3a 52%, #0b2348 100%);
+      font-family: var(--sans);
+      color: var(--white);
+      -webkit-font-smoothing: antialiased;
+      touch-action: manipulation;
+    }
+
+    button,
+    input {
+      font-family: inherit;
+    }
+
+    .appShell {
+      height: 100dvh;
+      width: 100vw;
+      padding: clamp(10px, 2vw, 22px);
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
 
-    .screen {
-      flex: 1;
-      min-height: 0;
-      background: var(--blue);
-      border: 3px solid var(--yellow);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .top {
-      background: rgba(0,0,0,.35);
-      border-bottom: 1px solid rgba(255,255,255,.15);
-      padding: 12px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .brand {
-      font-family: var(--mono);
-      font-weight: 900;
-      color: var(--yellow);
-      font-size: clamp(17px, 3vw, 28px);
-      letter-spacing: .4px;
-    }
-
-    .device {
-      font-family: var(--mono);
-      color: rgba(255,255,255,.6);
-      font-size: clamp(10px, 1.7vw, 14px);
-      text-align: right;
-    }
-
-    .body {
+    .mainBody {
       flex: 1;
       min-height: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
-      box-sizing: border-box;
-      color: white;
     }
 
-    .card {
-      width: min(720px, 94vw);
-      background: var(--blue2);
-      border: 2px solid rgba(241,210,0,.9);
-      box-shadow: 0 16px 50px rgba(0,0,0,.45);
-      padding: clamp(18px, 4vw, 34px);
-      box-sizing: border-box;
+    .statusBar {
+      min-height: 30px;
+      padding: 6px 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      color: rgba(255,255,255,.66);
+      border-radius: 999px;
+      font-size: clamp(10px, 1.5vw, 13px);
+      font-weight: 700;
       text-align: center;
+      letter-spacing: .02em;
+      backdrop-filter: blur(12px);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
-    .title {
-      font-family: var(--mono);
+    .pairCard {
+      width: min(760px, 94vw);
+      padding: clamp(22px, 4vw, 42px);
+      border-radius: 34px;
+      background: rgba(7,27,58,.84);
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 24px 80px rgba(0,0,0,.48);
+      backdrop-filter: blur(24px);
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .pairCard::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, rgba(143,23,40,.28), transparent 34%),
+        radial-gradient(circle at 78% 8%, rgba(103,216,255,.16), transparent 28%);
+      pointer-events: none;
+    }
+
+    .pairInner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .pairLogo {
+      width: 68px;
+      height: 68px;
+      margin: 0 auto 16px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--red), #c33a4f);
+      box-shadow: 0 14px 36px rgba(143,23,40,.36);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 950;
+      font-size: 26px;
+      letter-spacing: -.05em;
+    }
+
+    .pairTitle {
+      margin: 0;
+      font-size: clamp(34px, 7vw, 62px);
+      line-height: .98;
       font-weight: 900;
-      color: var(--yellow);
-      font-size: clamp(18px, 4vw, 38px);
-      margin-bottom: 10px;
-      letter-spacing: .3px;
+      letter-spacing: -.05em;
     }
 
-    .sub {
-      font-family: var(--mono);
-      color: rgba(255,255,255,.7);
-      font-size: clamp(11px, 2vw, 16px);
-      line-height: 1.6;
-      margin-bottom: 20px;
+    .pairSubtitle {
+      margin: 12px auto 26px;
+      max-width: 620px;
+      color: rgba(255,255,255,.72);
+      font-size: clamp(15px, 2.4vw, 20px);
+      font-weight: 650;
+      line-height: 1.45;
     }
 
     .pairCode {
-      width: 100%;
-      box-sizing: border-box;
-      background: rgba(0,0,0,.22);
-      border: 2px solid rgba(255,255,255,.45);
-      color: white;
-      font-family: var(--mono);
-      font-size: clamp(28px, 8vw, 70px);
+      width: min(520px, 100%);
+      border: 1px solid rgba(255,255,255,.28);
+      border-radius: 26px;
+      background: rgba(255,255,255,.10);
+      color: var(--white);
       text-align: center;
-      padding: 12px 14px;
-      letter-spacing: 10px;
+      font-family: var(--mono);
+      font-size: clamp(36px, 10vw, 78px);
+      font-weight: 900;
+      letter-spacing: .22em;
+      padding: 16px 18px;
       outline: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
     }
 
     .pairCode:focus {
-      border-color: var(--yellow);
-      box-shadow: 0 0 0 3px rgba(241,210,0,.25);
+      border-color: rgba(103,216,255,.72);
+      box-shadow:
+        0 0 0 5px rgba(103,216,255,.14),
+        inset 0 1px 0 rgba(255,255,255,.12);
     }
 
-    .btnRow {
+    .buttonRow {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
       gap: 12px;
-      margin-top: 18px;
+      margin-top: 22px;
     }
 
-    button {
+    .btn {
       appearance: none;
-      border: 2px solid rgba(255,255,255,.45);
-      background: rgba(0,0,0,.18);
-      color: white;
-      font-family: var(--mono);
-      font-weight: 900;
-      font-size: clamp(13px, 2.4vw, 20px);
-      padding: 13px 18px;
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 20px;
+      min-width: 138px;
+      color: var(--white);
+      background: rgba(255,255,255,.13);
+      font-size: clamp(14px, 2vw, 18px);
+      font-weight: 850;
       cursor: pointer;
-      min-width: 150px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.14);
     }
 
-    button.primary {
-      border-color: var(--yellow);
-      color: var(--yellow);
+    .btn.primary {
+      background: linear-gradient(135deg, var(--red), var(--red2));
+      box-shadow: 0 14px 34px rgba(143,23,40,.34);
     }
 
-    button.green {
-      border-color: #4cf04c;
-      color: #4cf04c;
+    .btn.secondary {
+      background: rgba(255,255,255,.11);
+      color: rgba(255,255,255,.82);
     }
 
-    button.red {
-      border-color: #ff7777;
-      color: #ff7777;
+    .btn.danger {
+      background: rgba(217,72,72,.22);
+      color: #ffdada;
     }
 
-    button:active {
+    .btn:active {
       transform: translateY(1px);
     }
 
-    .status {
-      background: rgba(0,0,0,.35);
-      border-top: 1px solid rgba(255,255,255,.15);
-      color: rgba(255,255,255,.8);
-      font-family: var(--mono);
-      font-size: clamp(11px, 2vw, 16px);
-      padding: 10px 14px;
-      min-height: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-
-    .paxName {
-      font-family: var(--mono);
-      font-weight: 900;
-      color: white;
-      font-size: clamp(28px, 7vw, 64px);
-      line-height: 1.05;
-      margin: 10px 0;
-      word-break: break-word;
-    }
-
-    .flightLine {
-      font-family: var(--mono);
-      font-weight: 900;
-      color: var(--cyan);
-      font-size: clamp(17px, 4vw, 34px);
-      margin-bottom: 8px;
-    }
-
-    .seatLine {
-      font-family: var(--mono);
-      font-weight: 900;
-      color: var(--yellow);
-      font-size: clamp(22px, 6vw, 52px);
-      margin-bottom: 20px;
-    }
-
-    .cameraBox {
-      width: min(520px, 88vw);
-      aspect-ratio: 4 / 3;
-      background: rgba(0,0,0,.45);
-      border: 3px solid rgba(255,255,255,.35);
-      margin: 12px auto 16px;
+    .customerFrame {
+      width: min(920px, 96vw);
+      height: min(94dvh, 1060px);
+      border-radius: clamp(28px, 4vw, 48px);
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 34px 110px rgba(0,0,0,.55);
+      border: 1px solid rgba(255,255,255,.22);
       position: relative;
+      isolation: isolate;
+    }
+
+    .cameraStage {
+      position: absolute;
+      inset: 0;
+      background: #000;
       overflow: hidden;
     }
 
-    video {
+    #bioVideo {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -224,637 +237,1108 @@
       background: #000;
     }
 
-    .faceCircle {
+    .cameraTint {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(5,16,31,.62) 0%, rgba(5,16,31,.12) 34%, rgba(5,16,31,.26) 100%),
+        radial-gradient(circle at 50% 42%, transparent 0%, transparent 28%, rgba(0,0,0,.23) 56%, rgba(0,0,0,.48) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .topBrand {
+      position: absolute;
+      left: clamp(16px, 3vw, 32px);
+      right: clamp(16px, 3vw, 32px);
+      top: clamp(14px, 2.8vw, 28px);
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .brandBlock {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brandIcon {
+      width: clamp(42px, 7vw, 66px);
+      height: clamp(42px, 7vw, 66px);
+      border-radius: clamp(15px, 2.5vw, 24px);
+      background: linear-gradient(135deg, var(--red), #c43b4e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(17px, 3vw, 28px);
+      font-weight: 950;
+      letter-spacing: -.07em;
+      box-shadow: 0 14px 36px rgba(143,23,40,.35);
+      flex: 0 0 auto;
+    }
+
+    .brandTextTop {
+      font-size: clamp(22px, 4.2vw, 44px);
+      line-height: 1;
+      font-weight: 920;
+      letter-spacing: -.055em;
+      white-space: nowrap;
+    }
+
+    .brandTextSub {
+      margin-top: 3px;
+      color: rgba(255,255,255,.70);
+      font-size: clamp(12px, 2vw, 18px);
+      font-weight: 780;
+      letter-spacing: .02em;
+      white-space: nowrap;
+    }
+
+    .livePill {
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.13);
+      border: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(18px);
+      color: rgba(255,255,255,.80);
+      font-size: clamp(11px, 1.9vw, 15px);
+      font-weight: 850;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .liveDot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #35d16f;
+      box-shadow: 0 0 0 4px rgba(53,209,111,.18);
+    }
+
+    .faceGuide {
       position: absolute;
       left: 50%;
-      top: 50%;
-      width: 48%;
-      height: 62%;
+      top: 45%;
+      width: min(46vw, 330px);
+      height: min(60vw, 440px);
+      max-width: 58%;
+      max-height: 62%;
       transform: translate(-50%, -50%);
-      border: 4px solid rgba(241,210,0,.85);
       border-radius: 50%;
-      box-shadow: 0 0 0 999px rgba(0,0,0,.18);
+      border: 4px solid rgba(255,255,255,.78);
+      box-shadow:
+        0 0 0 999px rgba(0,0,0,.08),
+        0 0 44px rgba(103,216,255,.22),
+        inset 0 0 30px rgba(103,216,255,.10);
+      z-index: 3;
       pointer-events: none;
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .faceGuide.active {
+      border-color: rgba(53,209,111,.98);
+      box-shadow:
+        0 0 0 999px rgba(0,0,0,.07),
+        0 0 58px rgba(53,209,111,.38),
+        inset 0 0 32px rgba(53,209,111,.14);
+    }
+
+    .scanLine {
+      position: absolute;
+      left: 13%;
+      right: 13%;
+      top: 0;
+      height: 3px;
+      border-radius: 99px;
+      background: linear-gradient(90deg, transparent, rgba(103,216,255,.92), transparent);
+      opacity: .0;
+      z-index: 4;
+      pointer-events: none;
+      animation: none;
+    }
+
+    .scanLine.active {
+      opacity: 1;
+      animation: scanMove 1.1s ease-in-out infinite;
+    }
+
+    @keyframes scanMove {
+      0%   { top: 18%; opacity: .15; }
+      18%  { opacity: .95; }
+      50%  { top: 78%; opacity: .95; }
+      100% { top: 18%; opacity: .15; }
+    }
+
+    .customerPanel {
+      position: absolute;
+      left: clamp(14px, 3vw, 32px);
+      right: clamp(14px, 3vw, 32px);
+      bottom: clamp(16px, 3vw, 34px);
+      z-index: 6;
+      padding: clamp(18px, 3.5vw, 32px);
+      border-radius: clamp(26px, 4vw, 40px);
+      background: rgba(7,27,58,.78);
+      border: 1px solid rgba(255,255,255,.22);
+      backdrop-filter: blur(22px);
+      box-shadow: 0 24px 80px rgba(0,0,0,.42);
+      text-align: center;
+      transition: transform .22s ease, opacity .22s ease;
+    }
+
+    .primaryMessage {
+      font-size: clamp(30px, 6.5vw, 70px);
+      line-height: .98;
+      letter-spacing: -.055em;
+      font-weight: 920;
+      margin: 0;
+    }
+
+    .secondaryMessage {
+      margin: 12px 0 0;
+      color: rgba(255,255,255,.78);
+      font-size: clamp(16px, 3vw, 28px);
+      line-height: 1.18;
+      font-weight: 760;
+    }
+
+    .statusMessage {
+      margin: 16px auto 0;
+      width: fit-content;
+      max-width: 100%;
+      border-radius: 999px;
+      padding: 9px 14px;
+      color: var(--cyan);
+      background: rgba(103,216,255,.12);
+      border: 1px solid rgba(103,216,255,.22);
+      font-size: clamp(12px, 2.2vw, 18px);
+      font-weight: 860;
+      letter-spacing: .01em;
+    }
+
+    .passengerPanel {
+      position: absolute;
+      left: clamp(14px, 3vw, 32px);
+      right: clamp(14px, 3vw, 32px);
+      bottom: clamp(16px, 3vw, 34px);
+      z-index: 7;
+      padding: clamp(18px, 3.5vw, 32px);
+      border-radius: clamp(26px, 4vw, 40px);
+      background: rgba(7,27,58,.88);
+      border: 1px solid rgba(255,255,255,.26);
+      backdrop-filter: blur(24px);
+      box-shadow: 0 26px 90px rgba(0,0,0,.50);
+      text-align: center;
+      transform: translateY(0);
+      opacity: 1;
+      transition: transform .22s ease, opacity .22s ease;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .passengerName {
+      font-size: clamp(30px, 7vw, 78px);
+      line-height: .96;
+      letter-spacing: -.055em;
+      font-weight: 930;
+      margin: 0;
+      word-break: break-word;
+    }
+
+    .seatText {
+      margin-top: 12px;
+      color: var(--cream);
+      font-size: clamp(26px, 5.5vw, 58px);
+      line-height: 1;
+      font-weight: 920;
+      letter-spacing: -.04em;
     }
 
     .verifyText {
-      font-family: var(--mono);
-      color: var(--yellow);
+      margin: 16px auto 0;
+      width: fit-content;
+      max-width: 100%;
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: rgba(103,216,255,.12);
+      border: 1px solid rgba(103,216,255,.22);
+      color: var(--cyan);
+      font-size: clamp(13px, 2.3vw, 20px);
+      font-weight: 880;
+    }
+
+    .resultOverlay {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: clamp(24px, 5vw, 60px);
+      background:
+        radial-gradient(circle at 50% 25%, rgba(255,255,255,.16), transparent 32%),
+        linear-gradient(135deg, rgba(32,166,90,.98), rgba(14,116,60,.98));
+      transform: translateY(100%);
+      opacity: 0;
+      transition: transform .28s ease, opacity .28s ease;
+    }
+
+    .resultOverlay.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .resultOverlay.fail {
+      background:
+        radial-gradient(circle at 50% 25%, rgba(255,255,255,.14), transparent 32%),
+        linear-gradient(135deg, rgba(185,38,56,.98), rgba(111,17,34,.98));
+    }
+
+    .resultMain {
+      font-size: clamp(42px, 9vw, 96px);
+      line-height: .95;
+      letter-spacing: -.065em;
+      font-weight: 940;
+      margin: 0;
+    }
+
+    .resultSub {
+      margin-top: 18px;
+      color: rgba(255,255,255,.86);
+      font-size: clamp(26px, 5.8vw, 66px);
+      line-height: 1;
       font-weight: 900;
-      font-size: clamp(15px, 3vw, 26px);
-      min-height: 34px;
-      margin-top: 8px;
+      letter-spacing: -.04em;
     }
 
-    .resultPass {
-      color: #4cf04c;
+    .agentHotspot {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 84px;
+      height: 84px;
+      z-index: 30;
+      opacity: 0;
+      border: 0;
+      background: transparent;
     }
 
-    .resultFail {
-      color: #ff7777;
+    .agentPanel {
+      position: absolute;
+      right: clamp(12px, 2.4vw, 22px);
+      bottom: clamp(12px, 2.4vw, 22px);
+      z-index: 31;
+      width: min(340px, calc(100vw - 24px));
+      padding: 14px;
+      border-radius: 22px;
+      background: rgba(5,16,31,.88);
+      border: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(24px);
+      box-shadow: 0 24px 70px rgba(0,0,0,.5);
     }
 
-    .small {
-      font-size: clamp(10px, 1.7vw, 14px);
-      opacity: .65;
+    .agentTitle {
+      margin: 0 0 10px;
+      font-size: 13px;
+      font-weight: 900;
+      color: rgba(255,255,255,.72);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .agentGrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .agentBtn {
+      min-width: 0;
+      padding: 10px 9px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 900;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.10);
+      color: rgba(255,255,255,.90);
+      box-shadow: none;
+    }
+
+    .agentBtn.primary {
+      background: rgba(32,166,90,.26);
+      color: #dcffe9;
+    }
+
+    .agentBtn.danger {
+      background: rgba(217,72,72,.24);
+      color: #ffe1e1;
+    }
+
+    .deviceLine {
+      margin-top: 10px;
+      color: rgba(255,255,255,.42);
       font-family: var(--mono);
-      margin-top: 12px;
-      line-height: 1.5;
+      font-size: 10px;
+      word-break: break-all;
+    }
+
+    @media (orientation: landscape) and (max-height: 620px) {
+      .topBrand {
+        top: 12px;
+      }
+
+      .customerPanel,
+      .passengerPanel {
+        padding: 15px 18px;
+        bottom: 12px;
+      }
+
+      .primaryMessage,
+      .passengerName {
+        font-size: clamp(26px, 5vw, 48px);
+      }
+
+      .secondaryMessage,
+      .seatText {
+        margin-top: 7px;
+      }
     }
   </style>
 </head>
+
 <body>
-  <div class="shell">
-    <div class="screen">
-      <div class="top">
-        <div class="brand">AIR BUFFALO BIOPAD</div>
-        <div class="device" id="deviceInfo">DEVICE</div>
-      </div>
-
-      <div class="body" id="body"></div>
-
-      <div class="status" id="status">STARTING...</div>
-    </div>
+  <div class="appShell">
+    <div id="body" class="mainBody"></div>
+    <div id="status" class="statusBar">Starting BioPad…</div>
   </div>
 
-<script>
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1p1VK-CvkVaCc2-zAa2c2YYPN2V0jRv05drfuye-JHloLGxoBaAOOPoTtOiObBHZj/exec";
+  <script>
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1p1VK-CvkVaCc2-zAa2c2YYPN2V0jRv05drfuye-JHloLGxoBaAOOPoTtOiObBHZj/exec";
 
-  const $ = id => document.getElementById(id);
+    const $ = id => document.getElementById(id);
 
-  let DEVICE_ID = localStorage.getItem("abf_biopad_device_id");
-  let DEVICE_NAME = localStorage.getItem("abf_biopad_device_name") || "Air Buffalo BioPad";
-  let PAIRED = localStorage.getItem("abf_biopad_paired") === "TRUE";
+    const POLL_INTERVAL_MS = 450;
+    const FACE_INTERVAL_MS = 150;
+    const FACE_FRAMES_REQUIRED = 3;
 
-  let CURRENT_TXN = null;
-  let POLL_TIMER = null;
-  let STREAM = null;
+    let DEVICE_ID = localStorage.getItem("abf_biopad_device_id");
+    let DEVICE_NAME = localStorage.getItem("abf_biopad_device_name") || "Air Buffalo BioPad";
+    let PAIRED = localStorage.getItem("abf_biopad_paired") === "TRUE";
 
-  let FACE_DETECTOR = null;
-  let FACE_DETECTOR_READY = false;
-  let FACE_LOOP_TIMER = null;
-  let FACE_STABLE_COUNT = 0;
-  let AUTO_VERIFY_IN_PROGRESS = false;
-  let LAST_FACE_STATUS = "";
+    let CURRENT_TXN = null;
+    let POLL_TIMER = null;
+    let STREAM = null;
 
-  if (!DEVICE_ID) {
-    DEVICE_ID = "BIOPAD-" + (
-      crypto.randomUUID
-        ? crypto.randomUUID()
-        : String(Date.now()) + Math.random().toString(36).slice(2)
-    ).replace(/-/g, "").slice(0, 12).toUpperCase();
+    let FACE_DETECTOR = null;
+    let FACE_DETECTOR_READY = false;
+    let FACE_DETECTOR_ERROR = "";
+    let FACE_LOOP_TIMER = null;
+    let FACE_STABLE_COUNT = 0;
+    let AUTO_VERIFY_IN_PROGRESS = false;
+    let LAST_FACE_STATUS = "";
+    let ADMIN_PRESS_TIMER = null;
 
-    localStorage.setItem("abf_biopad_device_id", DEVICE_ID);
-  }
-
-  $("deviceInfo").textContent = DEVICE_ID;
-
-  function bioApi_(action, params, callback) {
-    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf("PASTE_") === 0) {
-      callback({ ok: false, error: "MISSING_APPS_SCRIPT_URL" });
-      return;
+    if (!DEVICE_ID) {
+      DEVICE_ID = makeDeviceId_();
+      localStorage.setItem("abf_biopad_device_id", DEVICE_ID);
     }
 
-    const baseUrl = String(APPS_SCRIPT_URL || "").trim().replace(/\/$/, "");
-    const cbName = "abfBioCb_" + Math.random().toString(36).slice(2);
-    let completed = false;
+    function makeDeviceId_() {
+      return "BIOPAD-" + (
+        crypto.randomUUID
+          ? crypto.randomUUID()
+          : String(Date.now()) + Math.random().toString(36).slice(2)
+      ).replace(/-/g, "").slice(0, 12).toUpperCase();
+    }
 
-    window[cbName] = function(res) {
-      completed = true;
+    function setStatus_(msg) {
+      const el = $("status");
+      if (el) el.textContent = msg || "";
+    }
 
-      try {
-        callback(res);
-      } finally {
+    function esc_(v) {
+      return String(v == null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function bioApi_(action, params, callback) {
+      if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf("PASTE_") === 0) {
+        callback({ ok: false, error: "MISSING_APPS_SCRIPT_URL" });
+        return;
+      }
+
+      const baseUrl = String(APPS_SCRIPT_URL || "").trim().replace(/\/$/, "");
+      const cbName = "abfBioCb_" + Math.random().toString(36).slice(2);
+      let completed = false;
+
+      window[cbName] = function(res) {
+        completed = true;
+
+        try {
+          callback(res);
+        } finally {
+          delete window[cbName];
+
+          const old = document.getElementById(cbName);
+          if (old) old.remove();
+        }
+      };
+
+      const q = new URLSearchParams({
+        api: "1",
+        path: "bio",
+        action: action,
+        callback: cbName
+      });
+
+      Object.keys(params || {}).forEach(k => {
+        q.set(k, params[k] == null ? "" : String(params[k]));
+      });
+
+      const src = baseUrl + "?" + q.toString();
+
+      const s = document.createElement("script");
+      s.id = cbName;
+      s.src = src;
+
+      s.onerror = function() {
+        if (completed) return;
+
+        completed = true;
         delete window[cbName];
 
         const old = document.getElementById(cbName);
         if (old) old.remove();
-      }
-    };
 
-    const q = new URLSearchParams({
-      api: "1",
-      path: "bio",
-      action: action,
-      callback: cbName
-    });
+        callback({
+          ok: false,
+          error: "SCRIPT_LOAD_FAILED",
+          detail: "Could not load Apps Script API URL.",
+          url: src
+        });
+      };
 
-    Object.keys(params || {}).forEach(k => {
-      q.set(k, params[k] == null ? "" : String(params[k]));
-    });
+      document.body.appendChild(s);
 
-    const src = baseUrl + "?" + q.toString();
+      setTimeout(() => {
+        if (completed) return;
 
-    const s = document.createElement("script");
-    s.id = cbName;
-    s.src = src;
+        completed = true;
+        delete window[cbName];
 
-    s.onerror = function() {
-      if (completed) return;
+        const old = document.getElementById(cbName);
+        if (old) old.remove();
 
-      completed = true;
-      delete window[cbName];
-
-      const old = document.getElementById(cbName);
-      if (old) old.remove();
-
-      callback({
-        ok: false,
-        error: "SCRIPT_LOAD_FAILED",
-        detail: "Could not load Apps Script API URL.",
-        url: src
-      });
-    };
-
-    document.body.appendChild(s);
-
-    setTimeout(() => {
-      if (completed) return;
-
-      completed = true;
-      delete window[cbName];
-
-      const old = document.getElementById(cbName);
-      if (old) old.remove();
-
-      callback({
-        ok: false,
-        error: "API_TIMEOUT",
-        detail: "Apps Script loaded but did not call the JSONP callback.",
-        url: src
-      });
-    }, 10000);
-  }
-
-  function setStatus_(msg) {
-    $("status").textContent = msg || "";
-  }
-
-  function esc_(v) {
-    return String(v == null ? "" : v)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-  }
-
-  function renderPair_() {
-    stopPolling_();
-    stopFaceLoop_();
-    stopCamera_();
-    CURRENT_TXN = null;
-    AUTO_VERIFY_IN_PROGRESS = false;
-    FACE_STABLE_COUNT = 0;
-
-    $("body").innerHTML = `
-      <div class="card">
-        <div class="title">PAIR BIOPAD</div>
-        <div class="sub">
-          ON QIK GATE: SECONDARY KEYPAD &gt; BIOPAD PAIR<br>
-          ENTER THE 6-DIGIT CODE BELOW
-        </div>
-        <input id="pairCode" class="pairCode" inputmode="numeric" maxlength="6" autocomplete="off" />
-        <div class="btnRow">
-          <button class="primary" onclick="submitPair_()">PAIR</button>
-          <button onclick="resetPair_()">RESET DEVICE</button>
-        </div>
-        <div class="small">
-          Camera stays live after pairing. Passenger verification starts automatically after gate scan.
-        </div>
-      </div>
-    `;
-
-    setTimeout(() => {
-      const inp = $("pairCode");
-      if (!inp) return;
-
-      inp.focus();
-
-      inp.addEventListener("input", () => {
-        inp.value = inp.value.replace(/\D/g, "").slice(0, 6);
-        if (inp.value.length === 6) submitPair_();
-      });
-
-      inp.addEventListener("keydown", ev => {
-        if (ev.key === "Enter") submitPair_();
-      });
-    }, 50);
-
-    setStatus_("WAITING FOR PAIR CODE");
-  }
-
-  function submitPair_() {
-    const code = String($("pairCode")?.value || "").trim();
-
-    if (!/^\d{6}$/.test(code)) {
-      setStatus_("ENTER 6-DIGIT PAIR CODE");
-      return;
+        callback({
+          ok: false,
+          error: "API_TIMEOUT",
+          detail: "Apps Script loaded but did not call the JSONP callback.",
+          url: src
+        });
+      }, 10000);
     }
 
-    setStatus_("PAIRING...");
+    function renderPair_() {
+      stopPolling_();
+      stopFaceLoop_();
+      stopCamera_();
 
-    bioApi_("pair", {
-      pairCode: code,
-      deviceId: DEVICE_ID,
-      deviceName: DEVICE_NAME
-    }, res => {
-      if (!res || !res.ok) {
-        setStatus_("PAIR ERROR: " + ((res && (res.detail || res.error || res.message)) || "UNKNOWN"));
+      CURRENT_TXN = null;
+      AUTO_VERIFY_IN_PROGRESS = false;
+      FACE_STABLE_COUNT = 0;
+
+      $("body").innerHTML = `
+        <div class="pairCard">
+          <div class="pairInner">
+            <div class="pairLogo">AB</div>
+            <h1 class="pairTitle">Pair BioPad</h1>
+            <div class="pairSubtitle">
+              On QIK GATE, open the secondary keypad and select <strong>BioPad Pair</strong>.
+              Enter the six-digit code below.
+            </div>
+
+            <input id="pairCode" class="pairCode" inputmode="numeric" maxlength="6" autocomplete="off" />
+
+            <div class="buttonRow">
+              <button class="btn primary" onclick="submitPair_()">Pair</button>
+              <button class="btn secondary" onclick="resetDevice_()">Reset device</button>
+            </div>
+
+            <div style="margin-top:18px;color:rgba(255,255,255,.46);font-family:var(--mono);font-size:12px;word-break:break-all;">
+              ${esc_(DEVICE_ID)}
+            </div>
+          </div>
+        </div>
+      `;
+
+      setTimeout(() => {
+        const inp = $("pairCode");
+        if (!inp) return;
+
+        inp.focus();
+
+        inp.addEventListener("input", () => {
+          inp.value = inp.value.replace(/\D/g, "").slice(0, 6);
+          if (inp.value.length === 6) submitPair_();
+        });
+
+        inp.addEventListener("keydown", ev => {
+          if (ev.key === "Enter") submitPair_();
+        });
+      }, 50);
+
+      setStatus_("Waiting for BioPad pair code");
+    }
+
+    function submitPair_() {
+      const code = String($("pairCode")?.value || "").trim();
+
+      if (!/^\d{6}$/.test(code)) {
+        setStatus_("Enter the 6-digit pair code");
         return;
       }
 
-      localStorage.setItem("abf_biopad_paired", "TRUE");
-      PAIRED = true;
+      setStatus_("Pairing BioPad…");
 
-      setStatus_("PAIRED TO " + (res.station || "GATE") + " — STARTING CAMERA");
-      renderLiveCamera_();
+      bioApi_("pair", {
+        pairCode: code,
+        deviceId: DEVICE_ID,
+        deviceName: DEVICE_NAME
+      }, res => {
+        if (!res || !res.ok) {
+          setStatus_("PAIR ERROR: " + ((res && (res.detail || res.error || res.message)) || "UNKNOWN"));
+          return;
+        }
+
+        localStorage.setItem("abf_biopad_paired", "TRUE");
+        PAIRED = true;
+
+        renderCustomerCamera_();
+        startCamera_();
+        initFaceDetector_();
+        startPolling_();
+
+        setStatus_("Paired — starting live camera");
+      });
+    }
+
+    function unpair_() {
+      localStorage.removeItem("abf_biopad_paired");
+      PAIRED = false;
+      renderPair_();
+    }
+
+    function resetDevice_() {
+      localStorage.removeItem("abf_biopad_paired");
+      localStorage.removeItem("abf_biopad_device_id");
+
+      DEVICE_ID = makeDeviceId_();
+      localStorage.setItem("abf_biopad_device_id", DEVICE_ID);
+
+      PAIRED = false;
+      renderPair_();
+    }
+
+    function renderCustomerCamera_() {
+      $("body").innerHTML = `
+        <div class="customerFrame">
+          <div class="cameraStage">
+            <video id="bioVideo" autoplay playsinline muted></video>
+            <div class="cameraTint"></div>
+
+            <div class="topBrand">
+              <div class="brandBlock">
+                <div class="brandIcon">AB</div>
+                <div>
+                  <div class="brandTextTop">Air Buffalo</div>
+                  <div class="brandTextSub">Biometric Boarding</div>
+                </div>
+              </div>
+
+              <div class="livePill">
+                <span class="liveDot"></span>
+                Camera Live
+              </div>
+            </div>
+
+            <div id="faceGuide" class="faceGuide">
+              <div id="scanLine" class="scanLine"></div>
+            </div>
+
+            <div id="idlePanel" class="customerPanel">
+              <h2 id="idlePrimary" class="primaryMessage">Look toward the camera</h2>
+              <p id="idleSecondary" class="secondaryMessage">
+                Your boarding pass will be scanned at the podium
+              </p>
+              <div id="idleStatus" class="statusMessage">Ready for biometric boarding</div>
+            </div>
+
+            <div id="passengerPanel" class="passengerPanel hidden">
+              <h2 id="passengerName" class="passengerName">Passenger</h2>
+              <div id="passengerSeat" class="seatText">Seat</div>
+              <div id="verifyStatus" class="verifyText">Please look at the camera</div>
+            </div>
+
+            <div id="resultOverlay" class="resultOverlay">
+              <div>
+                <h2 id="resultMain" class="resultMain">Enjoy your flight</h2>
+                <div id="resultSub" class="resultSub">Seat</div>
+              </div>
+            </div>
+
+            <button
+              class="agentHotspot"
+              aria-label="Agent controls"
+              onpointerdown="startAdminPress_()"
+              onpointerup="endAdminPress_()"
+              onpointercancel="endAdminPress_()"
+              onpointerleave="endAdminPress_()">
+            </button>
+
+            <div id="agentPanel" class="agentPanel hidden">
+              <p class="agentTitle">Agent controls</p>
+              <div class="agentGrid">
+                <button class="agentBtn primary" onclick="manualPass_()">Manual Pass</button>
+                <button class="agentBtn danger" onclick="failCurrent_()">Fail</button>
+                <button class="agentBtn" onclick="cancelCurrent_()">Cancel</button>
+                <button class="agentBtn" onclick="unpair_()">Unpair</button>
+                <button class="agentBtn" onclick="restartCamera_()">Restart Cam</button>
+                <button class="agentBtn danger" onclick="resetDevice_()">Reset Device</button>
+              </div>
+              <div class="deviceLine">${esc_(DEVICE_ID)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function startCamera_() {
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error("getUserMedia unavailable. Check HTTPS and browser camera permissions.");
+        }
+
+        stopCamera_();
+
+        STREAM = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "user",
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+
+        const video = $("bioVideo");
+        if (video) {
+          video.srcObject = STREAM;
+          await video.play();
+        }
+
+        setIdleStatus_("Camera active");
+        setStatus_("Camera live — waiting for gate scan");
+        startFaceLoop_();
+      } catch (e) {
+        STREAM = null;
+        setIdleStatus_("Camera permission required");
+        setStatus_("CAMERA ERROR: " + (e && e.message ? e.message : e));
+      }
+    }
+
+    function stopCamera_() {
+      try {
+        if (STREAM) {
+          STREAM.getTracks().forEach(t => t.stop());
+        }
+      } catch (e) {}
+
+      STREAM = null;
+    }
+
+    function restartCamera_() {
+      setStatus_("Restarting camera…");
+      startCamera_();
+    }
+
+    async function initFaceDetector_() {
+      if (FACE_DETECTOR_READY || FACE_DETECTOR) return;
+
+      try {
+        setIdleStatus_("Loading face detector…");
+        setStatus_("Loading face detector…");
+
+        const vision = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/vision_bundle.mjs");
+
+        const filesetResolver = await vision.FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm"
+        );
+
+        FACE_DETECTOR = await vision.FaceDetector.createFromOptions(filesetResolver, {
+          baseOptions: {
+            modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/latest/blaze_face_short_range.tflite",
+            delegate: "CPU"
+          },
+          runningMode: "VIDEO",
+          minDetectionConfidence: 0.55
+        });
+
+        FACE_DETECTOR_READY = true;
+        FACE_DETECTOR_ERROR = "";
+
+        setIdleStatus_("Ready for biometric boarding");
+        setStatus_("Camera live — face detector ready");
+      } catch (e) {
+        FACE_DETECTOR_READY = false;
+        FACE_DETECTOR = null;
+        FACE_DETECTOR_ERROR = e && e.message ? e.message : String(e);
+
+        setIdleStatus_("Face detector unavailable — see gate agent");
+        setStatus_("FACE DETECTOR ERROR: " + FACE_DETECTOR_ERROR);
+      }
+    }
+
+    function startFaceLoop_() {
+      stopFaceLoop_();
+
+      FACE_LOOP_TIMER = setInterval(() => {
+        detectFaceTick_();
+      }, FACE_INTERVAL_MS);
+    }
+
+    function stopFaceLoop_() {
+      if (FACE_LOOP_TIMER) {
+        clearInterval(FACE_LOOP_TIMER);
+        FACE_LOOP_TIMER = null;
+      }
+    }
+
+    function detectFaceTick_() {
+      const video = $("bioVideo");
+
+      if (!video || !STREAM || video.readyState < 2) return;
+
+      if (!FACE_DETECTOR_READY || !FACE_DETECTOR) {
+        setFaceActive_(false);
+
+        if (CURRENT_TXN) {
+          setVerifyStatus_("Face detector loading…", "loading");
+        } else {
+          setIdleStatus_(FACE_DETECTOR_ERROR ? "Face detector unavailable" : "Loading face detector…");
+        }
+
+        return;
+      }
+
+      let hasFace = false;
+
+      try {
+        const result = FACE_DETECTOR.detectForVideo(video, performance.now());
+        const detections = result && result.detections ? result.detections : [];
+        hasFace = detections.length > 0;
+      } catch (e) {
+        setFaceActive_(false);
+
+        if (CURRENT_TXN) {
+          setVerifyStatus_("Face detection error", "error");
+        } else {
+          setIdleStatus_("Face detection error");
+        }
+
+        return;
+      }
+
+      if (hasFace) {
+        FACE_STABLE_COUNT++;
+        setFaceActive_(true);
+
+        if (CURRENT_TXN) {
+          setVerifyStatus_("Verifying…", "ok");
+        } else {
+          setIdleStatus_("Camera ready");
+        }
+      } else {
+        FACE_STABLE_COUNT = 0;
+        setFaceActive_(false);
+
+        if (CURRENT_TXN) {
+          setVerifyStatus_("Please look at the camera", "normal");
+        } else {
+          setIdleStatus_("Ready for biometric boarding");
+        }
+      }
+
+      if (
+        CURRENT_TXN &&
+        !AUTO_VERIFY_IN_PROGRESS &&
+        FACE_STABLE_COUNT >= FACE_FRAMES_REQUIRED
+      ) {
+        autoVerifyCurrent_();
+      }
+    }
+
+    function setFaceActive_(active) {
+      const guide = $("faceGuide");
+      const scan = $("scanLine");
+
+      if (guide) guide.classList.toggle("active", !!active);
+      if (scan) scan.classList.toggle("active", !!CURRENT_TXN && !!active);
+    }
+
+    function setIdleStatus_(text) {
+      const el = $("idleStatus");
+      if (el) el.textContent = text || "";
+    }
+
+    function setVerifyStatus_(text, mode) {
+      const el = $("verifyStatus");
+      if (!el) return;
+
+      el.textContent = text || "";
+
+      if (mode === "ok") {
+        el.style.color = "#dfffea";
+        el.style.background = "rgba(32,166,90,.18)";
+        el.style.borderColor = "rgba(32,166,90,.30)";
+      } else if (mode === "error") {
+        el.style.color = "#ffe2e2";
+        el.style.background = "rgba(217,72,72,.18)";
+        el.style.borderColor = "rgba(217,72,72,.30)";
+      } else {
+        el.style.color = "var(--cyan)";
+        el.style.background = "rgba(103,216,255,.12)";
+        el.style.borderColor = "rgba(103,216,255,.22)";
+      }
+    }
+
+    function startPolling_() {
+      stopPolling_();
+
+      POLL_TIMER = setInterval(() => {
+        bioApi_("poll", {
+          deviceId: DEVICE_ID
+        }, res => {
+          if (!res) {
+            setStatus_("POLL ERROR: NO RESPONSE");
+            return;
+          }
+
+          if (res.ok === false) {
+            setStatus_("POLL ERROR: " + (res.detail || res.error || res.message || "UNKNOWN"));
+            return;
+          }
+
+          if (res.paired === false) {
+            setStatus_(res.message || "Device not paired");
+            stopPolling_();
+            renderPair_();
+            return;
+          }
+
+          if (res.pending) {
+            if (!CURRENT_TXN || CURRENT_TXN.bioTxnId !== res.pending.bioTxnId) {
+              receivePending_(res.pending);
+            }
+            return;
+          }
+
+          if (!CURRENT_TXN && !AUTO_VERIFY_IN_PROGRESS) {
+            setStatus_("Camera live — waiting for gate scan");
+          }
+        });
+      }, POLL_INTERVAL_MS);
+    }
+
+    function stopPolling_() {
+      if (POLL_TIMER) {
+        clearInterval(POLL_TIMER);
+        POLL_TIMER = null;
+      }
+    }
+
+    function receivePending_(p) {
+      CURRENT_TXN = p;
+      AUTO_VERIFY_IN_PROGRESS = false;
+      FACE_STABLE_COUNT = 0;
+      LAST_FACE_STATUS = "";
+
+      const idlePanel = $("idlePanel");
+      const passengerPanel = $("passengerPanel");
+      const resultOverlay = $("resultOverlay");
+      const passengerName = $("passengerName");
+      const passengerSeat = $("passengerSeat");
+
+      if (resultOverlay) {
+        resultOverlay.classList.remove("show", "fail");
+      }
+
+      if (idlePanel) idlePanel.classList.add("hidden");
+      if (passengerPanel) passengerPanel.classList.remove("hidden");
+
+      if (passengerName) passengerName.textContent = p.passengerName || "Passenger";
+      if (passengerSeat) passengerSeat.textContent = "Seat " + (p.seat || "");
+
+      setVerifyStatus_("Please look at the camera", "normal");
+      setStatus_("Verifying " + (p.passengerName || "passenger") + " — seat " + (p.seat || ""));
+    }
+
+    function clearCurrentTxn_() {
+      CURRENT_TXN = null;
+      AUTO_VERIFY_IN_PROGRESS = false;
+      FACE_STABLE_COUNT = 0;
+      LAST_FACE_STATUS = "";
+
+      const idlePanel = $("idlePanel");
+      const passengerPanel = $("passengerPanel");
+      const resultOverlay = $("resultOverlay");
+
+      if (resultOverlay) {
+        resultOverlay.classList.remove("show", "fail");
+      }
+
+      if (passengerPanel) passengerPanel.classList.add("hidden");
+      if (idlePanel) idlePanel.classList.remove("hidden");
+
+      setFaceActive_(false);
+      setIdleStatus_("Ready for biometric boarding");
+      setStatus_("Camera live — waiting for gate scan");
+    }
+
+    function autoVerifyCurrent_() {
+      if (!CURRENT_TXN || AUTO_VERIFY_IN_PROGRESS) return;
+
+      AUTO_VERIFY_IN_PROGRESS = true;
+      setVerifyStatus_("Match confirmed", "ok");
+      setStatus_("Match confirmed — sending to gate");
+
+      setTimeout(() => {
+        completeVerification_("PASS", 97, "MATCH_OK", "Simulated biometric match confirmed");
+      }, 220);
+    }
+
+    function manualPass_() {
+      if (!CURRENT_TXN) {
+        setStatus_("No active passenger to pass");
+        return;
+      }
+
+      AUTO_VERIFY_IN_PROGRESS = true;
+      completeVerification_("PASS", 95, "MANUAL_AGENT_PASS", "Agent manual biometric pass");
+    }
+
+    function failCurrent_() {
+      if (!CURRENT_TXN) {
+        setStatus_("No active passenger to fail");
+        return;
+      }
+
+      AUTO_VERIFY_IN_PROGRESS = true;
+      completeVerification_("FAIL", 42, "SIM_NO_MATCH", "Simulated biometric match failed");
+    }
+
+    function cancelCurrent_() {
+      if (!CURRENT_TXN) {
+        setStatus_("No active passenger to cancel");
+        return;
+      }
+
+      AUTO_VERIFY_IN_PROGRESS = true;
+      completeVerification_("CANCELLED", 0, "CAMERA_CANCELLED", "Camera verification cancelled");
+    }
+
+    function completeVerification_(result, score, reasonCode, reasonText) {
+      if (!CURRENT_TXN) return;
+
+      const finishedTxn = CURRENT_TXN;
+
+      bioApi_("complete", {
+        deviceId: DEVICE_ID,
+        bioTxnId: finishedTxn.bioTxnId,
+        result: result,
+        score: score,
+        reasonCode: reasonCode,
+        reasonText: reasonText
+      }, res => {
+        if (!res || !res.ok) {
+          AUTO_VERIFY_IN_PROGRESS = false;
+          setVerifyStatus_("Please approach the boarding podium", "error");
+          setStatus_("COMPLETE ERROR: " + ((res && (res.detail || res.error || res.message)) || "UNKNOWN"));
+          return;
+        }
+
+        const pass = String(res.status || "").toUpperCase() === "PASS";
+
+        showResult_(pass, finishedTxn);
+
+        setStatus_(pass ? "Pass sent to gate — boarding will complete" : "Verification failed — refer to agent");
+
+        setTimeout(() => {
+          clearCurrentTxn_();
+        }, pass ? 1500 : 3200);
+      });
+    }
+
+    function showResult_(pass, txn) {
+      const overlay = $("resultOverlay");
+      const main = $("resultMain");
+      const sub = $("resultSub");
+
+      if (!overlay || !main || !sub) return;
+
+      overlay.classList.toggle("fail", !pass);
+      overlay.classList.add("show");
+
+      if (pass) {
+        main.textContent = "Enjoy your flight";
+        sub.textContent = "Seat " + (txn.seat || "");
+      } else {
+        main.textContent = "Please approach the podium";
+        sub.textContent = "Gate agent assistance required";
+      }
+    }
+
+    function startAdminPress_() {
+      if (ADMIN_PRESS_TIMER) clearTimeout(ADMIN_PRESS_TIMER);
+
+      ADMIN_PRESS_TIMER = setTimeout(() => {
+        toggleAgentPanel_();
+      }, 950);
+    }
+
+    function endAdminPress_() {
+      if (ADMIN_PRESS_TIMER) {
+        clearTimeout(ADMIN_PRESS_TIMER);
+        ADMIN_PRESS_TIMER = null;
+      }
+    }
+
+    function toggleAgentPanel_() {
+      const panel = $("agentPanel");
+      if (!panel) return;
+
+      panel.classList.toggle("hidden");
+    }
+
+    if (PAIRED) {
+      renderCustomerCamera_();
       startCamera_();
       initFaceDetector_();
       startPolling_();
-    });
-  }
-
-  function resetPair_() {
-    localStorage.removeItem("abf_biopad_paired");
-    PAIRED = false;
-    renderPair_();
-  }
-
-  function renderLiveCamera_() {
-    $("body").innerHTML = `
-      <div class="card" style="padding:0;overflow:hidden;">
-        <div style="position:relative;">
-          <div class="cameraBox" style="width:100%;max-width:none;margin:0;border:0;aspect-ratio:4/3;">
-            <video id="bioVideo" autoplay playsinline muted></video>
-            <div class="faceCircle"></div>
-
-            <div id="readyOverlay" style="
-              position:absolute;
-              top:12px;
-              left:12px;
-              right:12px;
-              background:rgba(0,0,0,.58);
-              border:2px solid rgba(241,210,0,.9);
-              color:#fff;
-              font-family:var(--mono);
-              font-weight:900;
-              padding:10px 12px;
-              text-align:center;
-              z-index:5;
-            ">
-              READY — CAMERA LIVE
-            </div>
-
-            <div id="paxBanner" style="
-              display:none;
-              position:absolute;
-              left:0;
-              right:0;
-              bottom:0;
-              background:rgba(6,30,136,.94);
-              border-top:4px solid var(--yellow);
-              padding:14px 16px;
-              z-index:6;
-              text-align:center;
-            ">
-              <div id="paxBannerName" style="
-                font-family:var(--mono);
-                font-size:clamp(23px,5vw,48px);
-                font-weight:900;
-                color:#fff;
-                line-height:1.05;
-              "></div>
-              <div id="paxBannerSeat" style="
-                font-family:var(--mono);
-                font-size:clamp(20px,4vw,38px);
-                font-weight:900;
-                color:var(--yellow);
-                margin-top:4px;
-              "></div>
-              <div id="paxBannerStatus" style="
-                font-family:var(--mono);
-                font-size:clamp(11px,2vw,17px);
-                font-weight:900;
-                color:var(--cyan);
-                margin-top:8px;
-              ">
-                WAITING FOR FACE...
-              </div>
-            </div>
-          </div>
-
-          <div class="btnRow" style="padding:12px;margin-top:0;background:rgba(0,0,0,.25);">
-            <button onclick="resetPair_()">UNPAIR</button>
-            <button class="red" onclick="failCurrent_()">FAIL</button>
-            <button onclick="cancelCurrent_()">CANCEL</button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  async function startCamera_() {
-    try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error("getUserMedia unavailable. Check HTTPS and browser camera permissions.");
-      }
-
-      stopCamera_();
-
-      STREAM = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "user",
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        },
-        audio: false
-      });
-
-      const video = $("bioVideo");
-      if (video) {
-        video.srcObject = STREAM;
-        await video.play();
-      }
-
-      setStatus_("CAMERA LIVE — WAITING FOR GATE SCAN");
-      startFaceLoop_();
-    } catch (e) {
-      STREAM = null;
-      setStatus_("CAMERA ERROR: " + (e && e.message ? e.message : e));
-    }
-  }
-
-  function stopCamera_() {
-    try {
-      if (STREAM) {
-        STREAM.getTracks().forEach(t => t.stop());
-      }
-    } catch (e) {}
-
-    STREAM = null;
-  }
-
-  async function initFaceDetector_() {
-    if (FACE_DETECTOR_READY || FACE_DETECTOR) return;
-
-    try {
-      setStatus_("LOADING FACE DETECTOR...");
-
-      const vision = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/vision_bundle.mjs");
-
-      const filesetResolver = await vision.FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm"
-      );
-
-      FACE_DETECTOR = await vision.FaceDetector.createFromOptions(filesetResolver, {
-        baseOptions: {
-          modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/latest/blaze_face_short_range.tflite",
-          delegate: "GPU"
-        },
-        runningMode: "VIDEO",
-        minDetectionConfidence: 0.55
-      });
-
-      FACE_DETECTOR_READY = true;
-      setStatus_("CAMERA LIVE — FACE DETECTOR READY");
-    } catch (e) {
-      FACE_DETECTOR_READY = false;
-      FACE_DETECTOR = null;
-      setStatus_("FACE DETECTOR ERROR: " + (e && e.message ? e.message : e));
-    }
-  }
-
-  function startFaceLoop_() {
-    stopFaceLoop_();
-
-    FACE_LOOP_TIMER = setInterval(() => {
-      detectFaceTick_();
-    }, 180);
-  }
-
-  function stopFaceLoop_() {
-    if (FACE_LOOP_TIMER) {
-      clearInterval(FACE_LOOP_TIMER);
-      FACE_LOOP_TIMER = null;
-    }
-  }
-
-  function detectFaceTick_() {
-    const video = $("bioVideo");
-
-    if (!video || !STREAM || video.readyState < 2) return;
-
-    if (!FACE_DETECTOR_READY || !FACE_DETECTOR) {
-      updateFaceStatus_("FACE DETECTOR LOADING...");
-      return;
-    }
-
-    let hasFace = false;
-
-    try {
-      const result = FACE_DETECTOR.detectForVideo(video, performance.now());
-      const detections = (result && result.detections) ? result.detections : [];
-      hasFace = detections.length > 0;
-    } catch (e) {
-      updateFaceStatus_("FACE DETECTION ERROR");
-      return;
-    }
-
-    if (hasFace) {
-      FACE_STABLE_COUNT++;
-      updateFaceStatus_(CURRENT_TXN ? "FACE DETECTED — VERIFYING..." : "FACE DETECTED — READY");
     } else {
-      FACE_STABLE_COUNT = 0;
-      updateFaceStatus_(CURRENT_TXN ? "WAITING FOR FACE..." : "READY — CAMERA LIVE");
+      renderPair_();
     }
-
-    if (
-      CURRENT_TXN &&
-      !AUTO_VERIFY_IN_PROGRESS &&
-      FACE_STABLE_COUNT >= 4
-    ) {
-      autoVerifyCurrent_();
-    }
-  }
-
-  function updateFaceStatus_(text) {
-    if (LAST_FACE_STATUS === text) return;
-    LAST_FACE_STATUS = text;
-
-    const bannerStatus = $("paxBannerStatus");
-    const readyOverlay = $("readyOverlay");
-
-    if (CURRENT_TXN && bannerStatus) {
-      bannerStatus.textContent = text;
-    } else if (readyOverlay) {
-      readyOverlay.textContent = text;
-    }
-  }
-
-  function startPolling_() {
-    stopPolling_();
-
-    POLL_TIMER = setInterval(() => {
-      bioApi_("poll", {
-        deviceId: DEVICE_ID
-      }, res => {
-        if (!res) {
-          setStatus_("POLL ERROR: NO RESPONSE");
-          return;
-        }
-
-        if (res.ok === false) {
-          setStatus_("POLL ERROR: " + (res.detail || res.error || res.message || "UNKNOWN"));
-          return;
-        }
-
-        if (res.paired === false) {
-          setStatus_(res.message || "DEVICE NOT PAIRED");
-          stopPolling_();
-          renderPair_();
-          return;
-        }
-
-        if (res.pending) {
-          if (!CURRENT_TXN || CURRENT_TXN.bioTxnId !== res.pending.bioTxnId) {
-            receivePending_(res.pending);
-          }
-          return;
-        }
-
-        if (!CURRENT_TXN && !AUTO_VERIFY_IN_PROGRESS) {
-          setStatus_("CAMERA LIVE — WAITING FOR GATE SCAN");
-        }
-      });
-    }, 500);
-  }
-
-  function stopPolling_() {
-    if (POLL_TIMER) {
-      clearInterval(POLL_TIMER);
-      POLL_TIMER = null;
-    }
-  }
-
-  function receivePending_(p) {
-    CURRENT_TXN = p;
-    AUTO_VERIFY_IN_PROGRESS = false;
-    FACE_STABLE_COUNT = 0;
-
-    const banner = $("paxBanner");
-    const name = $("paxBannerName");
-    const seat = $("paxBannerSeat");
-    const status = $("paxBannerStatus");
-    const ready = $("readyOverlay");
-
-    if (ready) ready.style.display = "none";
-
-    if (banner) banner.style.display = "block";
-    if (name) name.textContent = p.passengerName || "";
-    if (seat) seat.textContent = "SEAT " + (p.seat || "");
-    if (status) status.textContent = "WAITING FOR FACE...";
-
-    setStatus_("VERIFYING " + (p.passengerName || "") + " — SEAT " + (p.seat || ""));
-  }
-
-  function clearCurrentTxn_() {
-    CURRENT_TXN = null;
-    AUTO_VERIFY_IN_PROGRESS = false;
-    FACE_STABLE_COUNT = 0;
-
-    const banner = $("paxBanner");
-    const ready = $("readyOverlay");
-
-    if (banner) banner.style.display = "none";
-    if (ready) {
-      ready.style.display = "block";
-      ready.textContent = "READY — CAMERA LIVE";
-    }
-
-    setStatus_("CAMERA LIVE — WAITING FOR GATE SCAN");
-  }
-
-  function autoVerifyCurrent_() {
-    if (!CURRENT_TXN || AUTO_VERIFY_IN_PROGRESS) return;
-
-    AUTO_VERIFY_IN_PROGRESS = true;
-
-    const status = $("paxBannerStatus");
-    if (status) status.textContent = "MATCH CONFIRMED — SENDING TO GATE";
-
-    setStatus_("MATCH CONFIRMED — SENDING PASS");
-
-    setTimeout(() => {
-      completeVerification_("PASS", 97, "MATCH_OK", "Simulated biometric match confirmed");
-    }, 300);
-  }
-
-  function failCurrent_() {
-    if (!CURRENT_TXN) {
-      setStatus_("NO ACTIVE PASSENGER TO FAIL");
-      return;
-    }
-
-    completeVerification_("FAIL", 42, "SIM_NO_MATCH", "Simulated biometric match failed");
-  }
-
-  function cancelCurrent_() {
-    if (!CURRENT_TXN) {
-      setStatus_("NO ACTIVE PASSENGER TO CANCEL");
-      return;
-    }
-
-    completeVerification_("CANCELLED", 0, "CAMERA_CANCELLED", "Camera verification cancelled");
-  }
-
-  function completeVerification_(result, score, reasonCode, reasonText) {
-    if (!CURRENT_TXN) return;
-
-    const finishedTxn = CURRENT_TXN;
-
-    bioApi_("complete", {
-      deviceId: DEVICE_ID,
-      bioTxnId: finishedTxn.bioTxnId,
-      result: result,
-      score: score,
-      reasonCode: reasonCode,
-      reasonText: reasonText
-    }, res => {
-      if (!res || !res.ok) {
-        AUTO_VERIFY_IN_PROGRESS = false;
-        setStatus_("COMPLETE ERROR: " + ((res && (res.detail || res.error || res.message)) || "UNKNOWN"));
-        return;
-      }
-
-      const pass = String(res.status || "").toUpperCase() === "PASS";
-
-      const bannerStatus = $("paxBannerStatus");
-      if (bannerStatus) {
-        bannerStatus.textContent = pass ? "PASS SENT — BOARDING COMPLETE" : "VERIFY FAILED — SEE AGENT";
-        bannerStatus.style.color = pass ? "#4cf04c" : "#ff7777";
-      }
-
-      setStatus_(pass ? "PASS SENT TO GATE — BOARDING WILL COMPLETE" : "FAIL SENT TO GATE — REFER TO AGENT");
-
-      setTimeout(() => {
-        const bannerStatus2 = $("paxBannerStatus");
-        if (bannerStatus2) {
-          bannerStatus2.style.color = "var(--cyan)";
-        }
-        clearCurrentTxn_();
-      }, 1200);
-    });
-  }
-
-  if (PAIRED) {
-    renderLiveCamera_();
-    startCamera_();
-    initFaceDetector_();
-    startPolling_();
-  } else {
-    renderPair_();
-  }
-</script>
+  </script>
 </body>
 </html>
