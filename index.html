@@ -1,0 +1,675 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Air Buffalo BioPad</title>
+  <style>
+    :root {
+      --blue: #0a33cc;
+      --blue2: #061e88;
+      --yellow: #f1d200;
+      --green: #19a019;
+      --red: #b10a0a;
+      --cyan: #00cfff;
+      --gray: #cfcfcf;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--gray);
+      font-family: var(--sans);
+      overflow: hidden;
+    }
+
+    .shell {
+      height: 100dvh;
+      box-sizing: border-box;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .screen {
+      flex: 1;
+      min-height: 0;
+      background: var(--blue);
+      border: 3px solid var(--yellow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .top {
+      background: rgba(0,0,0,.35);
+      border-bottom: 1px solid rgba(255,255,255,.15);
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand {
+      font-family: var(--mono);
+      font-weight: 900;
+      color: var(--yellow);
+      font-size: clamp(17px, 3vw, 28px);
+      letter-spacing: .4px;
+    }
+
+    .device {
+      font-family: var(--mono);
+      color: rgba(255,255,255,.6);
+      font-size: clamp(10px, 1.7vw, 14px);
+      text-align: right;
+    }
+
+    .body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+      color: white;
+    }
+
+    .card {
+      width: min(720px, 94vw);
+      background: var(--blue2);
+      border: 2px solid rgba(241,210,0,.9);
+      box-shadow: 0 16px 50px rgba(0,0,0,.45);
+      padding: clamp(18px, 4vw, 34px);
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    .title {
+      font-family: var(--mono);
+      font-weight: 900;
+      color: var(--yellow);
+      font-size: clamp(18px, 4vw, 38px);
+      margin-bottom: 10px;
+      letter-spacing: .3px;
+    }
+
+    .sub {
+      font-family: var(--mono);
+      color: rgba(255,255,255,.7);
+      font-size: clamp(11px, 2vw, 16px);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .pairCode {
+      width: 100%;
+      box-sizing: border-box;
+      background: rgba(0,0,0,.22);
+      border: 2px solid rgba(255,255,255,.45);
+      color: white;
+      font-family: var(--mono);
+      font-size: clamp(28px, 8vw, 70px);
+      text-align: center;
+      padding: 12px 14px;
+      letter-spacing: 10px;
+      outline: none;
+    }
+
+    .pairCode:focus {
+      border-color: var(--yellow);
+      box-shadow: 0 0 0 3px rgba(241,210,0,.25);
+    }
+
+    .btnRow {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    button {
+      appearance: none;
+      border: 2px solid rgba(255,255,255,.45);
+      background: rgba(0,0,0,.18);
+      color: white;
+      font-family: var(--mono);
+      font-weight: 900;
+      font-size: clamp(13px, 2.4vw, 20px);
+      padding: 13px 18px;
+      cursor: pointer;
+      min-width: 150px;
+    }
+
+    button.primary {
+      border-color: var(--yellow);
+      color: var(--yellow);
+    }
+
+    button.green {
+      border-color: #4cf04c;
+      color: #4cf04c;
+    }
+
+    button.red {
+      border-color: #ff7777;
+      color: #ff7777;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .status {
+      background: rgba(0,0,0,.35);
+      border-top: 1px solid rgba(255,255,255,.15);
+      color: rgba(255,255,255,.8);
+      font-family: var(--mono);
+      font-size: clamp(11px, 2vw, 16px);
+      padding: 10px 14px;
+      min-height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .paxName {
+      font-family: var(--mono);
+      font-weight: 900;
+      color: white;
+      font-size: clamp(28px, 7vw, 64px);
+      line-height: 1.05;
+      margin: 10px 0;
+      word-break: break-word;
+    }
+
+    .flightLine {
+      font-family: var(--mono);
+      font-weight: 900;
+      color: var(--cyan);
+      font-size: clamp(17px, 4vw, 34px);
+      margin-bottom: 8px;
+    }
+
+    .seatLine {
+      font-family: var(--mono);
+      font-weight: 900;
+      color: var(--yellow);
+      font-size: clamp(22px, 6vw, 52px);
+      margin-bottom: 20px;
+    }
+
+    .cameraBox {
+      width: min(520px, 88vw);
+      aspect-ratio: 4 / 3;
+      background: rgba(0,0,0,.45);
+      border: 3px solid rgba(255,255,255,.35);
+      margin: 12px auto 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+      background: #000;
+    }
+
+    .faceCircle {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 48%;
+      height: 62%;
+      transform: translate(-50%, -50%);
+      border: 4px solid rgba(241,210,0,.85);
+      border-radius: 50%;
+      box-shadow: 0 0 0 999px rgba(0,0,0,.18);
+      pointer-events: none;
+    }
+
+    .verifyText {
+      font-family: var(--mono);
+      color: var(--yellow);
+      font-weight: 900;
+      font-size: clamp(15px, 3vw, 26px);
+      min-height: 34px;
+      margin-top: 8px;
+    }
+
+    .resultPass {
+      color: #4cf04c;
+    }
+
+    .resultFail {
+      color: #ff7777;
+    }
+
+    .small {
+      font-size: clamp(10px, 1.7vw, 14px);
+      opacity: .65;
+      font-family: var(--mono);
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="screen">
+      <div class="top">
+        <div class="brand">AIR BUFFALO BIOPAD</div>
+        <div class="device" id="deviceInfo">DEVICE</div>
+      </div>
+
+      <div class="body" id="body"></div>
+
+      <div class="status" id="status">STARTING...</div>
+    </div>
+  </div>
+
+  <script>
+    const APPS_SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE";
+
+    const $ = id => document.getElementById(id);
+
+    let DEVICE_ID = localStorage.getItem("abf_biopad_device_id");
+    let DEVICE_NAME = localStorage.getItem("abf_biopad_device_name") || "Air Buffalo BioPad";
+    let PAIRED = localStorage.getItem("abf_biopad_paired") === "TRUE";
+    let CURRENT_TXN = null;
+    let POLL_TIMER = null;
+    let STREAM = null;
+
+    if (!DEVICE_ID) {
+      DEVICE_ID = "BIOPAD-" + (
+        crypto.randomUUID
+          ? crypto.randomUUID()
+          : String(Date.now()) + Math.random().toString(36).slice(2)
+      ).replace(/-/g, "").slice(0, 12).toUpperCase();
+
+      localStorage.setItem("abf_biopad_device_id", DEVICE_ID);
+    }
+
+    $("deviceInfo").textContent = DEVICE_ID;
+
+    function bioApi_(action, params, callback) {
+      if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf("PASTE_") === 0) {
+        callback({ ok: false, error: "MISSING_APPS_SCRIPT_URL" });
+        return;
+      }
+
+      const cbName = "abfBioCb_" + Math.random().toString(36).slice(2);
+
+      window[cbName] = function(res) {
+        try {
+          callback(res);
+        } finally {
+          delete window[cbName];
+          const old = document.getElementById(cbName);
+          if (old) old.remove();
+        }
+      };
+
+      const q = new URLSearchParams({
+        api: "1",
+        path: "bio",
+        action: action,
+        callback: cbName
+      });
+
+      Object.keys(params || {}).forEach(k => {
+        q.set(k, params[k] == null ? "" : String(params[k]));
+      });
+
+      const s = document.createElement("script");
+      s.id = cbName;
+      s.src = APPS_SCRIPT_URL + "?" + q.toString();
+      s.onerror = function() {
+        delete window[cbName];
+        callback({ ok: false, error: "SCRIPT_LOAD_FAILED" });
+      };
+
+      document.body.appendChild(s);
+    }
+
+    function setStatus_(msg) {
+      $("status").textContent = msg || "";
+    }
+
+    function esc_(v) {
+      return String(v == null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function renderPair_() {
+      stopCamera_();
+      CURRENT_TXN = null;
+
+      $("body").innerHTML = `
+        <div class="card">
+          <div class="title">PAIR BIOPAD</div>
+          <div class="sub">
+            ON QIK GATE: SECONDARY KEYPAD &gt; BIOPAD PAIR<br>
+            ENTER THE 6-DIGIT CODE BELOW
+          </div>
+          <input id="pairCode" class="pairCode" inputmode="numeric" maxlength="6" autocomplete="off" />
+          <div class="btnRow">
+            <button class="primary" onclick="submitPair_()">PAIR</button>
+            <button onclick="resetPair_()">RESET DEVICE</button>
+          </div>
+          <div class="small">
+            This page uses the live iPad camera. Boarding pass scans remain on the normal gate system.
+          </div>
+        </div>
+      `;
+
+      setTimeout(() => {
+        const inp = $("pairCode");
+        if (!inp) return;
+
+        inp.focus();
+
+        inp.addEventListener("input", () => {
+          inp.value = inp.value.replace(/\D/g, "").slice(0, 6);
+          if (inp.value.length === 6) submitPair_();
+        });
+
+        inp.addEventListener("keydown", ev => {
+          if (ev.key === "Enter") submitPair_();
+        });
+      }, 50);
+
+      setStatus_("WAITING FOR PAIR CODE");
+    }
+
+    function submitPair_() {
+      const code = String($("pairCode")?.value || "").trim();
+
+      if (!/^\d{6}$/.test(code)) {
+        setStatus_("ENTER 6-DIGIT PAIR CODE");
+        return;
+      }
+
+      setStatus_("PAIRING...");
+
+      bioApi_("pair", {
+        pairCode: code,
+        deviceId: DEVICE_ID,
+        deviceName: DEVICE_NAME
+      }, res => {
+        if (!res || !res.ok) {
+          setStatus_("PAIR ERROR: " + ((res && (res.detail || res.error || res.message)) || "UNKNOWN"));
+          return;
+        }
+
+        localStorage.setItem("abf_biopad_paired", "TRUE");
+        PAIRED = true;
+
+        setStatus_("PAIRED TO " + (res.station || "GATE") + " — WAITING");
+        renderWaiting_();
+        startPolling_();
+      });
+    }
+
+    function resetPair_() {
+      localStorage.removeItem("abf_biopad_paired");
+      PAIRED = false;
+      stopPolling_();
+      stopCamera_();
+      renderPair_();
+    }
+
+    function renderWaiting_() {
+      stopCamera_();
+      CURRENT_TXN = null;
+
+      $("body").innerHTML = `
+        <div class="card">
+          <div class="title">READY</div>
+          <div class="sub">
+            WAITING FOR NEXT PASSENGER<br>
+            SCAN BOARDING PASS AT THE NORMAL GATE PODIUM
+          </div>
+          <div class="btnRow">
+            <button onclick="resetPair_()">UNPAIR</button>
+            <button class="primary" onclick="testCamera_()">TEST CAMERA</button>
+          </div>
+          <div class="small">DEVICE ${esc_(DEVICE_ID)}</div>
+        </div>
+      `;
+
+      setStatus_("READY — WAITING FOR GATE SCAN");
+    }
+
+    function startPolling_() {
+      stopPolling_();
+
+      POLL_TIMER = setInterval(() => {
+        bioApi_("poll", {
+          deviceId: DEVICE_ID
+        }, res => {
+          if (!res) return;
+
+          if (res.paired === false) {
+            setStatus_(res.message || "DEVICE NOT PAIRED");
+            stopPolling_();
+            renderPair_();
+            return;
+          }
+
+          if (res.pending) {
+            if (!CURRENT_TXN || CURRENT_TXN.bioTxnId !== res.pending.bioTxnId) {
+              CURRENT_TXN = res.pending;
+              renderPending_(res.pending);
+            }
+            return;
+          }
+
+          if (!CURRENT_TXN) {
+            setStatus_("READY — WAITING FOR GATE SCAN");
+          }
+        });
+      }, 1000);
+    }
+
+    function stopPolling_() {
+      if (POLL_TIMER) {
+        clearInterval(POLL_TIMER);
+        POLL_TIMER = null;
+      }
+    }
+
+    function renderPending_(p) {
+      stopPolling_();
+
+      $("body").innerHTML = `
+        <div class="card">
+          <div class="title">VERIFY PASSENGER</div>
+          <div class="flightLine">${esc_(p.flightNo)} ${esc_(p.orig)}-${esc_(p.dest)}</div>
+          <div class="paxName">${esc_(p.passengerName)}</div>
+          <div class="seatLine">SEAT ${esc_(p.seat)}</div>
+
+          <div class="cameraBox">
+            <video id="bioVideo" autoplay playsinline muted></video>
+            <div class="faceCircle"></div>
+          </div>
+
+          <div class="verifyText" id="verifyText">POSITION FACE IN CIRCLE</div>
+
+          <div class="btnRow">
+            <button class="primary" onclick="runVerification_()">VERIFY</button>
+            <button class="red" onclick="failVerification_()">FAIL</button>
+            <button onclick="cancelVerification_()">CANCEL</button>
+          </div>
+
+          <div class="small">TXN ${esc_(p.bioTxnId)}</div>
+        </div>
+      `;
+
+      setStatus_("PASSENGER RECEIVED — CAMERA STARTING");
+      startCamera_();
+    }
+
+    async function startCamera_() {
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error("getUserMedia unavailable. Check HTTPS and browser camera permissions.");
+        }
+
+        stopCamera_();
+
+        STREAM = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "user",
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+
+        const video = $("bioVideo");
+        if (video) {
+          video.srcObject = STREAM;
+          await video.play();
+        }
+
+        setStatus_("CAMERA READY");
+      } catch (e) {
+        STREAM = null;
+
+        const t = $("verifyText");
+        if (t) {
+          t.textContent = "CAMERA ERROR — CHECK SAFARI PERMISSION";
+        }
+
+        setStatus_("CAMERA ERROR: " + (e && e.message ? e.message : e));
+      }
+    }
+
+    async function testCamera_() {
+      $("body").innerHTML = `
+        <div class="card">
+          <div class="title">CAMERA TEST</div>
+
+          <div class="cameraBox">
+            <video id="bioVideo" autoplay playsinline muted></video>
+            <div class="faceCircle"></div>
+          </div>
+
+          <div class="verifyText" id="verifyText">STARTING CAMERA...</div>
+
+          <div class="btnRow">
+            <button onclick="stopCamera_(); renderWaiting_(); startPolling_();">BACK</button>
+          </div>
+        </div>
+      `;
+
+      await startCamera_();
+    }
+
+    function stopCamera_() {
+      try {
+        if (STREAM) {
+          STREAM.getTracks().forEach(t => t.stop());
+        }
+      } catch (e) {}
+
+      STREAM = null;
+    }
+
+    function runVerification_() {
+      if (!CURRENT_TXN) return;
+
+      const t = $("verifyText");
+
+      if (t) {
+        t.className = "verifyText";
+        t.textContent = "SCANNING...";
+      }
+
+      setStatus_("BIOMETRIC VERIFICATION IN PROGRESS");
+
+      setTimeout(() => {
+        if (t) t.textContent = "MATCHING...";
+      }, 700);
+
+      setTimeout(() => {
+        completeVerification_("PASS", 97, "MATCH_OK", "Simulated biometric match confirmed");
+      }, 1700);
+    }
+
+    function failVerification_() {
+      completeVerification_("FAIL", 42, "SIM_NO_MATCH", "Simulated biometric match failed");
+    }
+
+    function cancelVerification_() {
+      completeVerification_("CANCELLED", 0, "CAMERA_CANCELLED", "Camera verification cancelled");
+    }
+
+    function completeVerification_(result, score, reasonCode, reasonText) {
+      if (!CURRENT_TXN) return;
+
+      setStatus_("SENDING " + result + "...");
+
+      bioApi_("complete", {
+        deviceId: DEVICE_ID,
+        bioTxnId: CURRENT_TXN.bioTxnId,
+        result: result,
+        score: score,
+        reasonCode: reasonCode,
+        reasonText: reasonText
+      }, res => {
+        stopCamera_();
+
+        if (!res || !res.ok) {
+          setStatus_("COMPLETE ERROR: " + ((res && (res.detail || res.error || res.message)) || "UNKNOWN"));
+          startPolling_();
+          return;
+        }
+
+        const pass = String(res.status || "").toUpperCase() === "PASS";
+
+        $("body").innerHTML = `
+          <div class="card">
+            <div class="title ${pass ? "resultPass" : "resultFail"}">${pass ? "MATCH CONFIRMED" : "VERIFY FAILED"}</div>
+            <div class="sub">
+              ${esc_(CURRENT_TXN.passengerName)}<br>
+              SEAT ${esc_(CURRENT_TXN.seat)}<br>
+              ${esc_((res && res.reasonText) || reasonText || "")}
+            </div>
+          </div>
+        `;
+
+        setStatus_(pass ? "PASS SENT TO GATE — BOARDING WILL COMPLETE" : "FAIL SENT TO GATE — REFER TO AGENT");
+
+        CURRENT_TXN = null;
+
+        setTimeout(() => {
+          renderWaiting_();
+          startPolling_();
+        }, 2500);
+      });
+    }
+
+    if (PAIRED) {
+      renderWaiting_();
+      startPolling_();
+    } else {
+      renderPair_();
+    }
+  </script>
+</body>
+</html>
