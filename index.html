@@ -277,399 +277,584 @@
     </div>
   </div>
 
-  <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1p1VK-CvkVaCc2-zAa2c2YYPN2V0jRv05drfuye-JHloLGxoBaAOOPoTtOiObBHZj/exec";
+<script>
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1p1VK-CvkVaCc2-zAa2c2YYPN2V0jRv05drfuye-JHloLGxoBaAOOPoTtOiObBHZj/exec";
 
-    const $ = id => document.getElementById(id);
+  const $ = id => document.getElementById(id);
 
-    let DEVICE_ID = localStorage.getItem("abf_biopad_device_id");
-    let DEVICE_NAME = localStorage.getItem("abf_biopad_device_name") || "Air Buffalo BioPad";
-    let PAIRED = localStorage.getItem("abf_biopad_paired") === "TRUE";
-    let CURRENT_TXN = null;
-    let POLL_TIMER = null;
-    let STREAM = null;
+  let DEVICE_ID = localStorage.getItem("abf_biopad_device_id");
+  let DEVICE_NAME = localStorage.getItem("abf_biopad_device_name") || "Air Buffalo BioPad";
+  let PAIRED = localStorage.getItem("abf_biopad_paired") === "TRUE";
 
-    if (!DEVICE_ID) {
-      DEVICE_ID = "BIOPAD-" + (
-        crypto.randomUUID
-          ? crypto.randomUUID()
-          : String(Date.now()) + Math.random().toString(36).slice(2)
-      ).replace(/-/g, "").slice(0, 12).toUpperCase();
+  let CURRENT_TXN = null;
+  let POLL_TIMER = null;
+  let STREAM = null;
 
-      localStorage.setItem("abf_biopad_device_id", DEVICE_ID);
+  let FACE_DETECTOR = null;
+  let FACE_DETECTOR_READY = false;
+  let FACE_LOOP_TIMER = null;
+  let FACE_STABLE_COUNT = 0;
+  let AUTO_VERIFY_IN_PROGRESS = false;
+  let LAST_FACE_STATUS = "";
+
+  if (!DEVICE_ID) {
+    DEVICE_ID = "BIOPAD-" + (
+      crypto.randomUUID
+        ? crypto.randomUUID()
+        : String(Date.now()) + Math.random().toString(36).slice(2)
+    ).replace(/-/g, "").slice(0, 12).toUpperCase();
+
+    localStorage.setItem("abf_biopad_device_id", DEVICE_ID);
+  }
+
+  $("deviceInfo").textContent = DEVICE_ID;
+
+  function bioApi_(action, params, callback) {
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf("PASTE_") === 0) {
+      callback({ ok: false, error: "MISSING_APPS_SCRIPT_URL" });
+      return;
     }
 
-    $("deviceInfo").textContent = DEVICE_ID;
+    const baseUrl = String(APPS_SCRIPT_URL || "").trim().replace(/\/$/, "");
+    const cbName = "abfBioCb_" + Math.random().toString(36).slice(2);
+    let completed = false;
 
-    function bioApi_(action, params, callback) {
-      if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf("PASTE_") === 0) {
-        callback({ ok: false, error: "MISSING_APPS_SCRIPT_URL" });
-        return;
-      }
+    window[cbName] = function(res) {
+      completed = true;
 
-      const cbName = "abfBioCb_" + Math.random().toString(36).slice(2);
-
-      window[cbName] = function(res) {
-        try {
-          callback(res);
-        } finally {
-          delete window[cbName];
-          const old = document.getElementById(cbName);
-          if (old) old.remove();
-        }
-      };
-
-      const q = new URLSearchParams({
-        api: "1",
-        path: "bio",
-        action: action,
-        callback: cbName
-      });
-
-      Object.keys(params || {}).forEach(k => {
-        q.set(k, params[k] == null ? "" : String(params[k]));
-      });
-
-      const s = document.createElement("script");
-      s.id = cbName;
-      s.src = APPS_SCRIPT_URL + "?" + q.toString();
-      s.onerror = function() {
+      try {
+        callback(res);
+      } finally {
         delete window[cbName];
-        callback({ ok: false, error: "SCRIPT_LOAD_FAILED" });
-      };
 
-      document.body.appendChild(s);
-    }
+        const old = document.getElementById(cbName);
+        if (old) old.remove();
+      }
+    };
 
-    function setStatus_(msg) {
-      $("status").textContent = msg || "";
-    }
+    const q = new URLSearchParams({
+      api: "1",
+      path: "bio",
+      action: action,
+      callback: cbName
+    });
 
-    function esc_(v) {
-      return String(v == null ? "" : v)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-    }
+    Object.keys(params || {}).forEach(k => {
+      q.set(k, params[k] == null ? "" : String(params[k]));
+    });
 
-    function renderPair_() {
-      stopCamera_();
-      CURRENT_TXN = null;
+    const src = baseUrl + "?" + q.toString();
 
-      $("body").innerHTML = `
-        <div class="card">
-          <div class="title">PAIR BIOPAD</div>
-          <div class="sub">
-            ON QIK GATE: SECONDARY KEYPAD &gt; BIOPAD PAIR<br>
-            ENTER THE 6-DIGIT CODE BELOW
-          </div>
-          <input id="pairCode" class="pairCode" inputmode="numeric" maxlength="6" autocomplete="off" />
-          <div class="btnRow">
-            <button class="primary" onclick="submitPair_()">PAIR</button>
-            <button onclick="resetPair_()">RESET DEVICE</button>
-          </div>
-          <div class="small">
-            This page uses the live iPad camera. Boarding pass scans remain on the normal gate system.
-          </div>
+    const s = document.createElement("script");
+    s.id = cbName;
+    s.src = src;
+
+    s.onerror = function() {
+      if (completed) return;
+
+      completed = true;
+      delete window[cbName];
+
+      const old = document.getElementById(cbName);
+      if (old) old.remove();
+
+      callback({
+        ok: false,
+        error: "SCRIPT_LOAD_FAILED",
+        detail: "Could not load Apps Script API URL.",
+        url: src
+      });
+    };
+
+    document.body.appendChild(s);
+
+    setTimeout(() => {
+      if (completed) return;
+
+      completed = true;
+      delete window[cbName];
+
+      const old = document.getElementById(cbName);
+      if (old) old.remove();
+
+      callback({
+        ok: false,
+        error: "API_TIMEOUT",
+        detail: "Apps Script loaded but did not call the JSONP callback.",
+        url: src
+      });
+    }, 10000);
+  }
+
+  function setStatus_(msg) {
+    $("status").textContent = msg || "";
+  }
+
+  function esc_(v) {
+    return String(v == null ? "" : v)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function renderPair_() {
+    stopPolling_();
+    stopFaceLoop_();
+    stopCamera_();
+    CURRENT_TXN = null;
+    AUTO_VERIFY_IN_PROGRESS = false;
+    FACE_STABLE_COUNT = 0;
+
+    $("body").innerHTML = `
+      <div class="card">
+        <div class="title">PAIR BIOPAD</div>
+        <div class="sub">
+          ON QIK GATE: SECONDARY KEYPAD &gt; BIOPAD PAIR<br>
+          ENTER THE 6-DIGIT CODE BELOW
         </div>
-      `;
+        <input id="pairCode" class="pairCode" inputmode="numeric" maxlength="6" autocomplete="off" />
+        <div class="btnRow">
+          <button class="primary" onclick="submitPair_()">PAIR</button>
+          <button onclick="resetPair_()">RESET DEVICE</button>
+        </div>
+        <div class="small">
+          Camera stays live after pairing. Passenger verification starts automatically after gate scan.
+        </div>
+      </div>
+    `;
 
-      setTimeout(() => {
-        const inp = $("pairCode");
-        if (!inp) return;
+    setTimeout(() => {
+      const inp = $("pairCode");
+      if (!inp) return;
 
-        inp.focus();
+      inp.focus();
 
-        inp.addEventListener("input", () => {
-          inp.value = inp.value.replace(/\D/g, "").slice(0, 6);
-          if (inp.value.length === 6) submitPair_();
-        });
+      inp.addEventListener("input", () => {
+        inp.value = inp.value.replace(/\D/g, "").slice(0, 6);
+        if (inp.value.length === 6) submitPair_();
+      });
 
-        inp.addEventListener("keydown", ev => {
-          if (ev.key === "Enter") submitPair_();
-        });
-      }, 50);
+      inp.addEventListener("keydown", ev => {
+        if (ev.key === "Enter") submitPair_();
+      });
+    }, 50);
 
-      setStatus_("WAITING FOR PAIR CODE");
+    setStatus_("WAITING FOR PAIR CODE");
+  }
+
+  function submitPair_() {
+    const code = String($("pairCode")?.value || "").trim();
+
+    if (!/^\d{6}$/.test(code)) {
+      setStatus_("ENTER 6-DIGIT PAIR CODE");
+      return;
     }
 
-    function submitPair_() {
-      const code = String($("pairCode")?.value || "").trim();
+    setStatus_("PAIRING...");
 
-      if (!/^\d{6}$/.test(code)) {
-        setStatus_("ENTER 6-DIGIT PAIR CODE");
+    bioApi_("pair", {
+      pairCode: code,
+      deviceId: DEVICE_ID,
+      deviceName: DEVICE_NAME
+    }, res => {
+      if (!res || !res.ok) {
+        setStatus_("PAIR ERROR: " + ((res && (res.detail || res.error || res.message)) || "UNKNOWN"));
         return;
       }
 
-      setStatus_("PAIRING...");
+      localStorage.setItem("abf_biopad_paired", "TRUE");
+      PAIRED = true;
 
-      bioApi_("pair", {
-        pairCode: code,
-        deviceId: DEVICE_ID,
-        deviceName: DEVICE_NAME
-      }, res => {
-        if (!res || !res.ok) {
-          setStatus_("PAIR ERROR: " + ((res && (res.detail || res.error || res.message)) || "UNKNOWN"));
-          return;
-        }
-
-        localStorage.setItem("abf_biopad_paired", "TRUE");
-        PAIRED = true;
-
-        setStatus_("PAIRED TO " + (res.station || "GATE") + " — WAITING");
-        renderWaiting_();
-        startPolling_();
-      });
-    }
-
-    function resetPair_() {
-      localStorage.removeItem("abf_biopad_paired");
-      PAIRED = false;
-      stopPolling_();
-      stopCamera_();
-      renderPair_();
-    }
-
-    function renderWaiting_() {
-      stopCamera_();
-      CURRENT_TXN = null;
-
-      $("body").innerHTML = `
-        <div class="card">
-          <div class="title">READY</div>
-          <div class="sub">
-            WAITING FOR NEXT PASSENGER<br>
-            SCAN BOARDING PASS AT THE NORMAL GATE PODIUM
-          </div>
-          <div class="btnRow">
-            <button onclick="resetPair_()">UNPAIR</button>
-            <button class="primary" onclick="testCamera_()">TEST CAMERA</button>
-          </div>
-          <div class="small">DEVICE ${esc_(DEVICE_ID)}</div>
-        </div>
-      `;
-
-      setStatus_("READY — WAITING FOR GATE SCAN");
-    }
-
-    function startPolling_() {
-      stopPolling_();
-
-      POLL_TIMER = setInterval(() => {
-        bioApi_("poll", {
-          deviceId: DEVICE_ID
-        }, res => {
-          if (!res) return;
-
-          if (res.paired === false) {
-            setStatus_(res.message || "DEVICE NOT PAIRED");
-            stopPolling_();
-            renderPair_();
-            return;
-          }
-
-          if (res.pending) {
-            if (!CURRENT_TXN || CURRENT_TXN.bioTxnId !== res.pending.bioTxnId) {
-              CURRENT_TXN = res.pending;
-              renderPending_(res.pending);
-            }
-            return;
-          }
-
-          if (!CURRENT_TXN) {
-            setStatus_("READY — WAITING FOR GATE SCAN");
-          }
-        });
-      }, 1000);
-    }
-
-    function stopPolling_() {
-      if (POLL_TIMER) {
-        clearInterval(POLL_TIMER);
-        POLL_TIMER = null;
-      }
-    }
-
-    function renderPending_(p) {
-      stopPolling_();
-
-      $("body").innerHTML = `
-        <div class="card">
-          <div class="title">VERIFY PASSENGER</div>
-          <div class="flightLine">${esc_(p.flightNo)} ${esc_(p.orig)}-${esc_(p.dest)}</div>
-          <div class="paxName">${esc_(p.passengerName)}</div>
-          <div class="seatLine">SEAT ${esc_(p.seat)}</div>
-
-          <div class="cameraBox">
-            <video id="bioVideo" autoplay playsinline muted></video>
-            <div class="faceCircle"></div>
-          </div>
-
-          <div class="verifyText" id="verifyText">POSITION FACE IN CIRCLE</div>
-
-          <div class="btnRow">
-            <button class="primary" onclick="runVerification_()">VERIFY</button>
-            <button class="red" onclick="failVerification_()">FAIL</button>
-            <button onclick="cancelVerification_()">CANCEL</button>
-          </div>
-
-          <div class="small">TXN ${esc_(p.bioTxnId)}</div>
-        </div>
-      `;
-
-      setStatus_("PASSENGER RECEIVED — CAMERA STARTING");
+      setStatus_("PAIRED TO " + (res.station || "GATE") + " — STARTING CAMERA");
+      renderLiveCamera_();
       startCamera_();
-    }
+      initFaceDetector_();
+      startPolling_();
+    });
+  }
 
-    async function startCamera_() {
-      try {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          throw new Error("getUserMedia unavailable. Check HTTPS and browser camera permissions.");
-        }
+  function resetPair_() {
+    localStorage.removeItem("abf_biopad_paired");
+    PAIRED = false;
+    renderPair_();
+  }
 
-        stopCamera_();
-
-        STREAM = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: "user",
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          },
-          audio: false
-        });
-
-        const video = $("bioVideo");
-        if (video) {
-          video.srcObject = STREAM;
-          await video.play();
-        }
-
-        setStatus_("CAMERA READY");
-      } catch (e) {
-        STREAM = null;
-
-        const t = $("verifyText");
-        if (t) {
-          t.textContent = "CAMERA ERROR — CHECK SAFARI PERMISSION";
-        }
-
-        setStatus_("CAMERA ERROR: " + (e && e.message ? e.message : e));
-      }
-    }
-
-    async function testCamera_() {
-      $("body").innerHTML = `
-        <div class="card">
-          <div class="title">CAMERA TEST</div>
-
-          <div class="cameraBox">
+  function renderLiveCamera_() {
+    $("body").innerHTML = `
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div style="position:relative;">
+          <div class="cameraBox" style="width:100%;max-width:none;margin:0;border:0;aspect-ratio:4/3;">
             <video id="bioVideo" autoplay playsinline muted></video>
             <div class="faceCircle"></div>
-          </div>
 
-          <div class="verifyText" id="verifyText">STARTING CAMERA...</div>
+            <div id="readyOverlay" style="
+              position:absolute;
+              top:12px;
+              left:12px;
+              right:12px;
+              background:rgba(0,0,0,.58);
+              border:2px solid rgba(241,210,0,.9);
+              color:#fff;
+              font-family:var(--mono);
+              font-weight:900;
+              padding:10px 12px;
+              text-align:center;
+              z-index:5;
+            ">
+              READY — CAMERA LIVE
+            </div>
 
-          <div class="btnRow">
-            <button onclick="stopCamera_(); renderWaiting_(); startPolling_();">BACK</button>
-          </div>
-        </div>
-      `;
-
-      await startCamera_();
-    }
-
-    function stopCamera_() {
-      try {
-        if (STREAM) {
-          STREAM.getTracks().forEach(t => t.stop());
-        }
-      } catch (e) {}
-
-      STREAM = null;
-    }
-
-    function runVerification_() {
-      if (!CURRENT_TXN) return;
-
-      const t = $("verifyText");
-
-      if (t) {
-        t.className = "verifyText";
-        t.textContent = "SCANNING...";
-      }
-
-      setStatus_("BIOMETRIC VERIFICATION IN PROGRESS");
-
-      setTimeout(() => {
-        if (t) t.textContent = "MATCHING...";
-      }, 700);
-
-      setTimeout(() => {
-        completeVerification_("PASS", 97, "MATCH_OK", "Simulated biometric match confirmed");
-      }, 1700);
-    }
-
-    function failVerification_() {
-      completeVerification_("FAIL", 42, "SIM_NO_MATCH", "Simulated biometric match failed");
-    }
-
-    function cancelVerification_() {
-      completeVerification_("CANCELLED", 0, "CAMERA_CANCELLED", "Camera verification cancelled");
-    }
-
-    function completeVerification_(result, score, reasonCode, reasonText) {
-      if (!CURRENT_TXN) return;
-
-      setStatus_("SENDING " + result + "...");
-
-      bioApi_("complete", {
-        deviceId: DEVICE_ID,
-        bioTxnId: CURRENT_TXN.bioTxnId,
-        result: result,
-        score: score,
-        reasonCode: reasonCode,
-        reasonText: reasonText
-      }, res => {
-        stopCamera_();
-
-        if (!res || !res.ok) {
-          setStatus_("COMPLETE ERROR: " + ((res && (res.detail || res.error || res.message)) || "UNKNOWN"));
-          startPolling_();
-          return;
-        }
-
-        const pass = String(res.status || "").toUpperCase() === "PASS";
-
-        $("body").innerHTML = `
-          <div class="card">
-            <div class="title ${pass ? "resultPass" : "resultFail"}">${pass ? "MATCH CONFIRMED" : "VERIFY FAILED"}</div>
-            <div class="sub">
-              ${esc_(CURRENT_TXN.passengerName)}<br>
-              SEAT ${esc_(CURRENT_TXN.seat)}<br>
-              ${esc_((res && res.reasonText) || reasonText || "")}
+            <div id="paxBanner" style="
+              display:none;
+              position:absolute;
+              left:0;
+              right:0;
+              bottom:0;
+              background:rgba(6,30,136,.94);
+              border-top:4px solid var(--yellow);
+              padding:14px 16px;
+              z-index:6;
+              text-align:center;
+            ">
+              <div id="paxBannerName" style="
+                font-family:var(--mono);
+                font-size:clamp(23px,5vw,48px);
+                font-weight:900;
+                color:#fff;
+                line-height:1.05;
+              "></div>
+              <div id="paxBannerSeat" style="
+                font-family:var(--mono);
+                font-size:clamp(20px,4vw,38px);
+                font-weight:900;
+                color:var(--yellow);
+                margin-top:4px;
+              "></div>
+              <div id="paxBannerStatus" style="
+                font-family:var(--mono);
+                font-size:clamp(11px,2vw,17px);
+                font-weight:900;
+                color:var(--cyan);
+                margin-top:8px;
+              ">
+                WAITING FOR FACE...
+              </div>
             </div>
           </div>
-        `;
 
-        setStatus_(pass ? "PASS SENT TO GATE — BOARDING WILL COMPLETE" : "FAIL SENT TO GATE — REFER TO AGENT");
+          <div class="btnRow" style="padding:12px;margin-top:0;background:rgba(0,0,0,.25);">
+            <button onclick="resetPair_()">UNPAIR</button>
+            <button class="red" onclick="failCurrent_()">FAIL</button>
+            <button onclick="cancelCurrent_()">CANCEL</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
 
-        CURRENT_TXN = null;
+  async function startCamera_() {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("getUserMedia unavailable. Check HTTPS and browser camera permissions.");
+      }
 
-        setTimeout(() => {
-          renderWaiting_();
-          startPolling_();
-        }, 2500);
+      stopCamera_();
+
+      STREAM = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "user",
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: false
       });
+
+      const video = $("bioVideo");
+      if (video) {
+        video.srcObject = STREAM;
+        await video.play();
+      }
+
+      setStatus_("CAMERA LIVE — WAITING FOR GATE SCAN");
+      startFaceLoop_();
+    } catch (e) {
+      STREAM = null;
+      setStatus_("CAMERA ERROR: " + (e && e.message ? e.message : e));
+    }
+  }
+
+  function stopCamera_() {
+    try {
+      if (STREAM) {
+        STREAM.getTracks().forEach(t => t.stop());
+      }
+    } catch (e) {}
+
+    STREAM = null;
+  }
+
+  async function initFaceDetector_() {
+    if (FACE_DETECTOR_READY || FACE_DETECTOR) return;
+
+    try {
+      setStatus_("LOADING FACE DETECTOR...");
+
+      const vision = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/vision_bundle.mjs");
+
+      const filesetResolver = await vision.FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm"
+      );
+
+      FACE_DETECTOR = await vision.FaceDetector.createFromOptions(filesetResolver, {
+        baseOptions: {
+          modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/latest/blaze_face_short_range.tflite",
+          delegate: "GPU"
+        },
+        runningMode: "VIDEO",
+        minDetectionConfidence: 0.55
+      });
+
+      FACE_DETECTOR_READY = true;
+      setStatus_("CAMERA LIVE — FACE DETECTOR READY");
+    } catch (e) {
+      FACE_DETECTOR_READY = false;
+      FACE_DETECTOR = null;
+      setStatus_("FACE DETECTOR ERROR: " + (e && e.message ? e.message : e));
+    }
+  }
+
+  function startFaceLoop_() {
+    stopFaceLoop_();
+
+    FACE_LOOP_TIMER = setInterval(() => {
+      detectFaceTick_();
+    }, 180);
+  }
+
+  function stopFaceLoop_() {
+    if (FACE_LOOP_TIMER) {
+      clearInterval(FACE_LOOP_TIMER);
+      FACE_LOOP_TIMER = null;
+    }
+  }
+
+  function detectFaceTick_() {
+    const video = $("bioVideo");
+
+    if (!video || !STREAM || video.readyState < 2) return;
+
+    if (!FACE_DETECTOR_READY || !FACE_DETECTOR) {
+      updateFaceStatus_("FACE DETECTOR LOADING...");
+      return;
     }
 
-    if (PAIRED) {
-      renderWaiting_();
-      startPolling_();
-    } else {
-      renderPair_();
+    let hasFace = false;
+
+    try {
+      const result = FACE_DETECTOR.detectForVideo(video, performance.now());
+      const detections = (result && result.detections) ? result.detections : [];
+      hasFace = detections.length > 0;
+    } catch (e) {
+      updateFaceStatus_("FACE DETECTION ERROR");
+      return;
     }
-  </script>
+
+    if (hasFace) {
+      FACE_STABLE_COUNT++;
+      updateFaceStatus_(CURRENT_TXN ? "FACE DETECTED — VERIFYING..." : "FACE DETECTED — READY");
+    } else {
+      FACE_STABLE_COUNT = 0;
+      updateFaceStatus_(CURRENT_TXN ? "WAITING FOR FACE..." : "READY — CAMERA LIVE");
+    }
+
+    if (
+      CURRENT_TXN &&
+      !AUTO_VERIFY_IN_PROGRESS &&
+      FACE_STABLE_COUNT >= 4
+    ) {
+      autoVerifyCurrent_();
+    }
+  }
+
+  function updateFaceStatus_(text) {
+    if (LAST_FACE_STATUS === text) return;
+    LAST_FACE_STATUS = text;
+
+    const bannerStatus = $("paxBannerStatus");
+    const readyOverlay = $("readyOverlay");
+
+    if (CURRENT_TXN && bannerStatus) {
+      bannerStatus.textContent = text;
+    } else if (readyOverlay) {
+      readyOverlay.textContent = text;
+    }
+  }
+
+  function startPolling_() {
+    stopPolling_();
+
+    POLL_TIMER = setInterval(() => {
+      bioApi_("poll", {
+        deviceId: DEVICE_ID
+      }, res => {
+        if (!res) {
+          setStatus_("POLL ERROR: NO RESPONSE");
+          return;
+        }
+
+        if (res.ok === false) {
+          setStatus_("POLL ERROR: " + (res.detail || res.error || res.message || "UNKNOWN"));
+          return;
+        }
+
+        if (res.paired === false) {
+          setStatus_(res.message || "DEVICE NOT PAIRED");
+          stopPolling_();
+          renderPair_();
+          return;
+        }
+
+        if (res.pending) {
+          if (!CURRENT_TXN || CURRENT_TXN.bioTxnId !== res.pending.bioTxnId) {
+            receivePending_(res.pending);
+          }
+          return;
+        }
+
+        if (!CURRENT_TXN && !AUTO_VERIFY_IN_PROGRESS) {
+          setStatus_("CAMERA LIVE — WAITING FOR GATE SCAN");
+        }
+      });
+    }, 500);
+  }
+
+  function stopPolling_() {
+    if (POLL_TIMER) {
+      clearInterval(POLL_TIMER);
+      POLL_TIMER = null;
+    }
+  }
+
+  function receivePending_(p) {
+    CURRENT_TXN = p;
+    AUTO_VERIFY_IN_PROGRESS = false;
+    FACE_STABLE_COUNT = 0;
+
+    const banner = $("paxBanner");
+    const name = $("paxBannerName");
+    const seat = $("paxBannerSeat");
+    const status = $("paxBannerStatus");
+    const ready = $("readyOverlay");
+
+    if (ready) ready.style.display = "none";
+
+    if (banner) banner.style.display = "block";
+    if (name) name.textContent = p.passengerName || "";
+    if (seat) seat.textContent = "SEAT " + (p.seat || "");
+    if (status) status.textContent = "WAITING FOR FACE...";
+
+    setStatus_("VERIFYING " + (p.passengerName || "") + " — SEAT " + (p.seat || ""));
+  }
+
+  function clearCurrentTxn_() {
+    CURRENT_TXN = null;
+    AUTO_VERIFY_IN_PROGRESS = false;
+    FACE_STABLE_COUNT = 0;
+
+    const banner = $("paxBanner");
+    const ready = $("readyOverlay");
+
+    if (banner) banner.style.display = "none";
+    if (ready) {
+      ready.style.display = "block";
+      ready.textContent = "READY — CAMERA LIVE";
+    }
+
+    setStatus_("CAMERA LIVE — WAITING FOR GATE SCAN");
+  }
+
+  function autoVerifyCurrent_() {
+    if (!CURRENT_TXN || AUTO_VERIFY_IN_PROGRESS) return;
+
+    AUTO_VERIFY_IN_PROGRESS = true;
+
+    const status = $("paxBannerStatus");
+    if (status) status.textContent = "MATCH CONFIRMED — SENDING TO GATE";
+
+    setStatus_("MATCH CONFIRMED — SENDING PASS");
+
+    setTimeout(() => {
+      completeVerification_("PASS", 97, "MATCH_OK", "Simulated biometric match confirmed");
+    }, 300);
+  }
+
+  function failCurrent_() {
+    if (!CURRENT_TXN) {
+      setStatus_("NO ACTIVE PASSENGER TO FAIL");
+      return;
+    }
+
+    completeVerification_("FAIL", 42, "SIM_NO_MATCH", "Simulated biometric match failed");
+  }
+
+  function cancelCurrent_() {
+    if (!CURRENT_TXN) {
+      setStatus_("NO ACTIVE PASSENGER TO CANCEL");
+      return;
+    }
+
+    completeVerification_("CANCELLED", 0, "CAMERA_CANCELLED", "Camera verification cancelled");
+  }
+
+  function completeVerification_(result, score, reasonCode, reasonText) {
+    if (!CURRENT_TXN) return;
+
+    const finishedTxn = CURRENT_TXN;
+
+    bioApi_("complete", {
+      deviceId: DEVICE_ID,
+      bioTxnId: finishedTxn.bioTxnId,
+      result: result,
+      score: score,
+      reasonCode: reasonCode,
+      reasonText: reasonText
+    }, res => {
+      if (!res || !res.ok) {
+        AUTO_VERIFY_IN_PROGRESS = false;
+        setStatus_("COMPLETE ERROR: " + ((res && (res.detail || res.error || res.message)) || "UNKNOWN"));
+        return;
+      }
+
+      const pass = String(res.status || "").toUpperCase() === "PASS";
+
+      const bannerStatus = $("paxBannerStatus");
+      if (bannerStatus) {
+        bannerStatus.textContent = pass ? "PASS SENT — BOARDING COMPLETE" : "VERIFY FAILED — SEE AGENT";
+        bannerStatus.style.color = pass ? "#4cf04c" : "#ff7777";
+      }
+
+      setStatus_(pass ? "PASS SENT TO GATE — BOARDING WILL COMPLETE" : "FAIL SENT TO GATE — REFER TO AGENT");
+
+      setTimeout(() => {
+        const bannerStatus2 = $("paxBannerStatus");
+        if (bannerStatus2) {
+          bannerStatus2.style.color = "var(--cyan)";
+        }
+        clearCurrentTxn_();
+      }, 1200);
+    });
+  }
+
+  if (PAIRED) {
+    renderLiveCamera_();
+    startCamera_();
+    initFaceDetector_();
+    startPolling_();
+  } else {
+    renderPair_();
+  }
+</script>
 </body>
 </html>
