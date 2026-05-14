@@ -1264,9 +1264,6 @@
       bioApi_("complete", {
         deviceId: DEVICE_ID,
         bioTxnId: finishedTxn.bioTxnId,
-        sessionId: finishedTxn.sessionId || "",
-        legKey: finishedTxn.legKey || "",
-        seat: finishedTxn.seat || "",
         result: result,
         score: score,
         reasonCode: reasonCode,
@@ -1283,9 +1280,7 @@
 
         showResult_(pass, finishedTxn);
 
-        setStatus_(pass
-          ? (res.boarded ? "Boarded — enjoy your flight" : "Pass sent to gate — agent review required")
-          : "Verification failed — refer to agent");
+        setStatus_(pass ? "Pass sent to gate — boarding will complete" : "Verification failed — refer to agent");
 
         setTimeout(() => {
           clearCurrentTxn_();
