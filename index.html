@@ -626,9 +626,9 @@
 
     const $ = id => document.getElementById(id);
 
-    const POLL_INTERVAL_MS = 450;
-    const FACE_INTERVAL_MS = 150;
-    const FACE_FRAMES_REQUIRED = 3;
+    const POLL_INTERVAL_MS = 250;
+    const FACE_INTERVAL_MS = 100;
+    const FACE_FRAMES_REQUIRED = 2;
 
     let DEVICE_ID = localStorage.getItem("abf_biopad_device_id");
     let DEVICE_NAME = localStorage.getItem("abf_biopad_device_name") || "Air Buffalo BioPad";
@@ -1223,9 +1223,7 @@
       setVerifyStatus_("Match confirmed", "ok");
       setStatus_("Match confirmed — sending to gate");
 
-      setTimeout(() => {
-        completeVerification_("PASS", 97, "MATCH_OK", "Simulated biometric match confirmed");
-      }, 220);
+      completeVerification_("PASS", 97, "MATCH_OK", "Simulated biometric match confirmed");
     }
 
     function manualPass_() {
@@ -1286,7 +1284,7 @@
 
         setTimeout(() => {
           clearCurrentTxn_();
-        }, pass ? 1500 : 3200);
+        }, pass ? 650 : 2200);
       });
     }
 
